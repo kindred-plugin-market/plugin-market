@@ -1,0 +1,65 @@
+name: Release
+
+# push <pluginId>-v<version> tag（如 photo-triage-v1.0.0）→ 借 Bench 宿主工作区
+# 构建该插件 → 注入 files 清单 → 打 zip → 发布 GitHub Release。
+# zip = 部署形态（manifest.json + index.html + bundle/），插件市场
+# registry.json 的 downloadUrl 指向本 Release 资产。
+on:
+  push:
+    tags:
+      - "*-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve plugin id from tag
+        run: echo "PLUGIN_ID=${GITHUB_REF_NAME%-v*}" >> "$GITHUB_ENV"
+
+      - name: Checkout plugin-market repository
+        uses: actions/checkout@v4
+        with:
+          path: market
+
+      - name: Checkout Bench host workspace
+        uses: actions/checkout@v4
+        with:
+          repository: indredK/bench
+          ref: main
+          token: ${{ secrets.BENCH_REPO_TOKEN }}
+          path: bench
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.8.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: bench/pnpm-lock.yaml
+
+      - name: Install host dependencies
+        working-directory: bench
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify plugin exists
+        run: test -f "market/extensions/$PLUGIN_ID/manifest.json"
+
+      - name: Place plugin into host workspace
+        run: |
+          rm -rf "bench/extensions/$PLUGIN_ID"
+          cp -R "market/extensions/$PLUGIN_ID" "bench/extensions/$PLUGIN_ID"
+
+      - name: Build & pack extension
+        working-directory: bench
+        run: node scripts/plugins/pack-extension.mjs "$PLUGIN_ID" --out "$GITHUB_WORKSPACE/dist"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
