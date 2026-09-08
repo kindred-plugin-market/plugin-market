@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-08T16:33:15Z",
+  "updatedAt": "2026-09-08T17:17:21Z",
   "extensions": [
     {
       "id": "clean-space",
@@ -22,9 +22,9 @@
             "bench": ">=1.30.0"
           },
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/clean-space-v1.0.0/bench-ext-clean-space-v1.0.0.zip",
-          "sha256": "75354b126c224d6203b7f12c6ec39c25b12789cd77ed7b779e67afbf251ad8b5",
-          "size": 199019,
-          "publishedAt": "2026-09-08T16:33:13Z",
+          "sha256": "1071e8b3dc7e5e658c5ac3caa51fa0a572581da29b527b2803194de5c2e0d85f",
+          "size": 198855,
+          "publishedAt": "2026-09-08T17:17:16Z",
           "yanked": false
         }
       ]
@@ -49,9 +49,9 @@
             "bench": ">=1.30.0"
           },
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/hardware-v1.0.0/bench-ext-hardware-v1.0.0.zip",
-          "sha256": "bdd3256a4540b2ee6ee0c5f5a69fdf8104e9f0e88d93a0d5be2e8bf38e9986a4",
-          "size": 254517,
-          "publishedAt": "2026-09-08T16:33:13Z",
+          "sha256": "4517a245186fab8bdeca90e2a7a66d78f68aa363cff0a5069e69822be1aef352",
+          "size": 254413,
+          "publishedAt": "2026-09-08T17:17:17Z",
           "yanked": false
         }
       ]
@@ -76,9 +76,9 @@
             "bench": ">=1.30.0"
           },
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/photo-triage-v0.1.0/bench-ext-photo-triage-v0.1.0.zip",
-          "sha256": "ef06c6b8941fd17608f88dc553d41d9f88803baceec3da056f644680e27d4f27",
-          "size": 171548,
-          "publishedAt": "2026-09-08T16:33:14Z",
+          "sha256": "6c23fe9e9b4084d4660620c52c71afb2fa604c07e7cd4f295216693fb83633a5",
+          "size": 171416,
+          "publishedAt": "2026-09-08T17:17:19Z",
           "yanked": false
         }
       ]
@@ -103,9 +103,9 @@
             "bench": ">=1.30.0"
           },
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/terminology-v1.0.0/bench-ext-terminology-v1.0.0.zip",
-          "sha256": "1013a3d1d440c4f90527970aa5ba8f1acb186e9c0d3d109fb98d091727336304",
-          "size": 180844,
-          "publishedAt": "2026-09-08T16:33:15Z",
+          "sha256": "bee486b1106e4f21c73ed19fb65e76e5c163c5cc447f0c33ac50593ea6930412",
+          "size": 180683,
+          "publishedAt": "2026-09-08T17:17:21Z",
           "yanked": false
         }
       ]
