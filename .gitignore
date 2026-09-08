@@ -7,3 +7,4 @@ node_modules/
 
 # os
 .DS_Store
+.registry-dist/
