@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-08T17:17:21Z",
+  "updatedAt": "2026-09-08T17:33:01Z",
   "extensions": [
     {
       "id": "clean-space",
@@ -24,7 +24,7 @@
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/clean-space-v1.0.0/bench-ext-clean-space-v1.0.0.zip",
           "sha256": "1071e8b3dc7e5e658c5ac3caa51fa0a572581da29b527b2803194de5c2e0d85f",
           "size": 198855,
-          "publishedAt": "2026-09-08T17:17:16Z",
+          "publishedAt": "2026-09-08T17:32:54Z",
           "yanked": false
         }
       ]
@@ -49,9 +49,9 @@
             "bench": ">=1.30.0"
           },
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/hardware-v1.0.0/bench-ext-hardware-v1.0.0.zip",
-          "sha256": "4517a245186fab8bdeca90e2a7a66d78f68aa363cff0a5069e69822be1aef352",
+          "sha256": "34f50e423fabffeec73b96bc0526719c34b5768f64a202c5ec167e0f7c10541c",
           "size": 254413,
-          "publishedAt": "2026-09-08T17:17:17Z",
+          "publishedAt": "2026-09-08T17:32:57Z",
           "yanked": false
         }
       ]
@@ -78,7 +78,7 @@
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/photo-triage-v0.1.0/bench-ext-photo-triage-v0.1.0.zip",
           "sha256": "6c23fe9e9b4084d4660620c52c71afb2fa604c07e7cd4f295216693fb83633a5",
           "size": 171416,
-          "publishedAt": "2026-09-08T17:17:19Z",
+          "publishedAt": "2026-09-08T17:33:00Z",
           "yanked": false
         }
       ]
@@ -105,7 +105,7 @@
           "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/terminology-v1.0.0/bench-ext-terminology-v1.0.0.zip",
           "sha256": "bee486b1106e4f21c73ed19fb65e76e5c163c5cc447f0c33ac50593ea6930412",
           "size": 180683,
-          "publishedAt": "2026-09-08T17:17:21Z",
+          "publishedAt": "2026-09-08T17:33:01Z",
           "yanked": false
         }
       ]
