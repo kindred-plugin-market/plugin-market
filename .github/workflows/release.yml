@@ -65,6 +65,9 @@ jobs:
           rm -rf "bench/extensions/$PLUGIN_ID"
           cp -R "market/extensions/$PLUGIN_ID" "bench/extensions/$PLUGIN_ID"
 
+      - name: Audit i18n self-containment
+        run: node market/scripts/audit-i18n.mjs --bench bench --plugin "$PLUGIN_ID"
+
       - name: Build & pack extension
         working-directory: bench
         run: node scripts/plugins/pack-extension.mjs "$PLUGIN_ID" --out "$GITHUB_WORKSPACE/dist"
