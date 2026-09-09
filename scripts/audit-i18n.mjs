@@ -20,14 +20,33 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
-const root = path.resolve(scriptDir, "..", "..") // Bench 仓库根（宿主共享模块来源）
-const marketDefault = path.resolve(root, "..", "kindred-plugin-market", "plugin-market")
+const repoRoot = path.resolve(scriptDir, "..", "..") // 脚本所在仓库根（market）
 
 const args = process.argv.slice(2)
 const valueOf = (name) => {
   const i = args.indexOf(name)
   return i !== -1 ? args[i + 1] : undefined
 }
+const onlyPlugin = valueOf("--plugin")
+
+// 宿主共享模块（插件 `@/` 引用 → bench/src）来源：
+// --bench 显式指定 > 仓库根自带 src/ > 相邻 bench 仓库（常见克隆布局）。
+function resolveBenchRoot() {
+  const explicit = valueOf("--bench")
+  if (explicit) return path.resolve(explicit)
+  if (existsSync(path.join(repoRoot, "src"))) return repoRoot
+  for (const candidate of [
+    path.resolve(repoRoot, "..", "bench"),
+    path.resolve(repoRoot, "..", "..", "bench"),
+  ]) {
+    if (existsSync(path.join(candidate, "src"))) return candidate
+  }
+  return repoRoot
+}
+const root = resolveBenchRoot()
+
+// market 仓库（真相源）：默认假定与 bench 并排（<bench>/../kindred-plugin-market/plugin-market）
+const marketDefault = path.resolve(root, "..", "kindred-plugin-market", "plugin-market")
 const marketDir = path.resolve(valueOf("--market") ?? marketDefault)
 
 /** 发现插件：优先 market 仓库，回退 Bench 本地 extensions/。 */

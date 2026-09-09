@@ -63,6 +63,7 @@ jobs:
 
       - name: Place plugin into host workspace
         run: |
+          mkdir -p bench/extensions
           rm -rf "bench/extensions/$PLUGIN_ID"
           cp -R "market/extensions/$PLUGIN_ID" "bench/extensions/$PLUGIN_ID"
 
