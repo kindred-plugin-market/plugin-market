@@ -1,0 +1,86 @@
+name: Build (main)
+
+# push 到 main → 借 Bench 宿主工作区构建 extensions/ 下全部插件 → zip 上传为
+# Actions artifact（retention 14 天）。仅产物留存，不创建 Release、不动 registry。
+# 正式发布仍走 release.yml（push <pluginId>-v<version> tag）。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout plugin-market repository
+        uses: actions/checkout@v4
+        with:
+          path: market
+
+      - name: Checkout Bench host workspace
+        uses: actions/checkout@v4
+        with:
+          repository: indredK/bench
+          ref: main
+          token: ${{ secrets.BENCH_REPO_TOKEN }}
+          path: bench
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.8.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: bench/pnpm-lock.yaml
+
+      - name: Install host dependencies
+        working-directory: bench
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect plugin ids
+        run: |
+          plugins=()
+          for m in market/extensions/*/manifest.json; do
+            [ -f "$m" ] || continue
+            plugins+=("$(basename "$(dirname "$m")")")
+          done
+          [ ${#plugins[@]} -gt 0 ] || { echo "No plugins found under market/extensions/" >&2; exit 1; }
+          printf '%s\n' "${plugins[@]}" > "$GITHUB_WORKSPACE/plugins.txt"
+          echo "Plugins to build:"
+          cat "$GITHUB_WORKSPACE/plugins.txt"
+
+      - name: Place plugins into host workspace
+        run: |
+          while IFS= read -r p; do
+            rm -rf "bench/extensions/$p"
+            cp -R "market/extensions/$p" "bench/extensions/$p"
+            echo "placed: $p"
+          done < "$GITHUB_WORKSPACE/plugins.txt"
+
+      - name: Audit i18n self-containment
+        run: |
+          while IFS= read -r p; do
+            echo "Auditing: $p"
+            node market/scripts/audit-i18n.mjs --bench bench --plugin "$p"
+          done < "$GITHUB_WORKSPACE/plugins.txt"
+
+      - name: Build & pack extensions
+        working-directory: bench
+        run: |
+          while IFS= read -r p; do
+            echo "Packing: $p"
+            node scripts/plugins/pack-extension.mjs "$p" --out "$GITHUB_WORKSPACE/dist"
+          done < "$GITHUB_WORKSPACE/plugins.txt"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-ext-zips
+          path: dist/*.zip
+          retention-days: 14
+          if-no-files-found: error
