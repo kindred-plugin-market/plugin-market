@@ -3,6 +3,11 @@
 > 日期：2026-09-09
 > 定位：**可执行的实施手册**，不是可行性分析。前置阅读：`docs/browser-extension-export-research.md`、`docs/extension-targets-roadmap.md`
 > 目标：把 MCP Server 与浏览器扩展作为同一条技术主线落地，共享一个能力内核。
+>
+> **落地状态（2026-09-09 第一轮实现完成）**：M0/M1/M2 已交付并验证（见下文
+> 「实现偏差」），M3 浏览器扩展 MVP 已交付（bench-companion，vanilla MV3），
+> M4 sidecar 构建脚本已接入。剩余项：photo-triage 完整 UI 的扩展内复刻、
+> `serve` 模式（图片字节流）、CWS 上架、rmcp 迁移。
 
 ---
 
@@ -757,6 +762,30 @@ printf '\x0b\x00\x00\x00{"cmd":"ping"}' | ./bench-host --mode native | xxd | hea
 | sidecar | Bench 退出时 host 进程被回收，无孤儿进程 |
 
 ---
+
+## 8+. 实现偏差记录（2026-09-09 第一轮）
+
+实际实现与手册的差异（原因均为「编译速度 / 依赖面 / 契约系统成本」，行为与手册一致）：
+
+| 手册原案 | 实际实现 | 原因 |
+| --- | --- | --- |
+| `bench-host` 用 clap 解析 argv | 手写 argv 解析 | 模式仅 4 个，零依赖（对齐 scripts 零依赖哲学） |
+| MCP 用 rmcp 3.x | 手写 newline-delimited JSON-RPC 2.0 子集（initialize/tools/list/tools/call/ping） | rmcp 拉入 200+ 依赖；子集 ~150 行且可测，迁移路径保留 |
+| tokio async | 全同步 stdio | 两种协议均为行/帧阻塞读写，无需 runtime |
+| MCP tools 含 `clean_space_scan_custom_folder` 等 6 个只读 tool | 同左，另加 `terminology_stats`；**删除类零暴露**（dispatcher 单测红线） | 一致 |
+| WXT 构建 bench-companion | 手写 vanilla MV3（零构建链） | 首个 MVP 优先证明通路；React UI 复刻列入下一轮 |
+| 导出器读磁盘模板目录 | 模板 `include_str!/include_bytes!` 编译期嵌入 | 消除运行时资源路径解析问题 |
+| terminology 复用 Rust 逻辑 | host 侧只读 JSON store reader（`terminology-store.json`，camelCase schema 兼容） | 原 storage.rs 强耦合 tauri-plugin-store；只读场景直接读文件更稳 |
+
+已验证（本机）：
+
+- `cargo test -p bench-capabilities -p bench-host`（22 通过）+ 主 crate 467 测试零回归；
+- MCP 会话（initialize → tools/list → tools/call 术语搜索，真实 store 8049 条）；
+- NM 帧往返：ping / 白名单拒绝（PATH_NOT_ALLOWED）/ 相册扫描 → 摘要统计；
+- guard 回归：`/var` → `/private/var` 符号链接 + 未创建目录误拒已修复并加测试；
+- sidecar：`node scripts/plugins/build-bench-host.mjs` 产出
+  `src-tauri/binaries/bench-host-aarch64-apple-darwin`，`tauri.conf.json`
+  externalBin + beforeBuildCommand 已接入。
 
 ## 9. 风险与开放问题
 

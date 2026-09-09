@@ -14,6 +14,15 @@
 | [`hardware`](./extensions/hardware/) | 硬件查询：多品类参数对比（纯前端零 IPC） | 1.0.0 |
 | [`clean-space`](./extensions/clean-space/) | 存储空间：存储总览 / dev-cleaner / 自定义清理（macOS） | 1.0.0 |
 
+## 跨端出口（bench-host）
+
+`platforms/browser/bench-companion/` 是 Bench 官方浏览器扩展（源真身在
+Bench 仓库 `src-tauri/resources/browser-extension/`，经 include 嵌入由
+Tauri 命令 `browser_ext_export` 一键导出）。它经 Native Messaging
+（`com.kindred.bench`）调用本机 `bench-host` 二进制——同一个二进制也是
+**MCP server**（`bench-host mcp`，供 Claude / Cursor 等接入）。架构与实施
+细节见 `docs/implementation-playbook-mcp-and-browser.md`。
+
 ## 发布一个插件
 
 ```bash
