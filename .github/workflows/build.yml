@@ -1,15 +1,15 @@
 name: Build (main)
 
-# push 到 main → 借 Bench 宿主工作区构建 extensions/ 下全部插件 → zip 上传为
-# Actions artifact（retention 14 天）。仅产物留存，不创建 Release、不动 registry。
-# 正式发布仍走 release.yml（push <pluginId>-v<version> tag）。
+# push 到 main → 借 Bench 宿主工作区构建 extensions/ 下全部插件 → zip 发布到
+# 滚动 Release「build-latest」（永久留存，每次自动覆盖旧资产，不抢 Latest 徽章）。
+# 正式发布仍走 release-please.yml（conventional commits → release PR → tag）→ release.yml。
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -78,10 +78,17 @@ jobs:
             node scripts/plugins/pack-extension.mjs "$p" --out "$GITHUB_WORKSPACE/dist"
           done < "$GITHUB_WORKSPACE/plugins.txt"
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Publish to rolling release
+        uses: softprops/action-gh-release@v2
         with:
-          name: bench-ext-zips
-          path: dist/*.zip
-          retention-days: 14
-          if-no-files-found: error
+          tag_name: build-latest
+          name: Latest build (main)
+          body: |
+            滚动构建产物：main 分支每次 push 自动重建并覆盖（永久留存，非正式版本）。
+
+            - 构建commit: ${{ github.sha }}
+            - 构建记录: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - 正式版本请下载各 `<pluginId>-v<version>` Release 的资产
+          prerelease: true
+          make_latest: false
+          files: dist/*.zip
