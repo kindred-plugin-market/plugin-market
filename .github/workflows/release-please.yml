@@ -3,12 +3,13 @@ name: Release Please
 # 参考 Bench 宿主仓库同款设计（manifest 多包模式，按插件独立发版）：
 # main 收到 conventional commits（feat/fix 等且触及 extensions/<id>/）→
 # 自动维护各插件 release PR（bump manifest.json 版本 + 生成 CHANGELOG.md）
-# → 合并 PR 后自动打 <pluginId>-v<version> tag 并创建 GitHub Release
-# → tag push 触发 release.yml 构建 zip 并上传到该 Release。
+# → 人工合并 PR 后自动打 <pluginId>-v<version> tag 并创建 GitHub Release
+# → 由下方 Trigger 步骤接力触发 release.yml 构建上传 zip 资产。
 #
-# token 说明：github.token 产生的 tag push 不会触发其他 workflow（GitHub
-# 防递归机制），因此优先 PAT：RELEASE_PLEASE_TOKEN > BENCH_REPO_TOKEN >
-# github.token（兜底时 tag 已创建但不自动发布，需手动 dispatch release.yml）。
+# token 说明：组织策略禁止寿命 >366 天的 fine-grained PAT 访问本仓库 API，
+# 故统一使用 github.token（可建 PR / 打 tag / 建 Release）。github.token 产生
+# 的 tag push 不会触发其他 workflow（GitHub 防递归），但 workflow_dispatch
+# 是官方明确例外 —— 因此用 `gh workflow run --ref <tag>` 逐插件接力发布。
 on:
   push:
     branches: [main]
@@ -28,9 +29,30 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Run release-please
+        id: rp
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.BENCH_REPO_TOKEN || github.token }}
+          token: ${{ github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: main
+
+      # 逐插件以 tag ref 触发 release.yml（workflow_dispatch 支持以 tag 为
+      # ref，此时其内部 github.ref = refs/tags/<tag>，tag 匹配、插件 id 解析
+      # 与 Release 上传步骤均按既有逻辑工作）。plugin_id 必须显式传入，
+      # 否则会被 release.yml 的 input default（hardware）填充而构建错插件。
+      - name: Trigger release workflow for each released tag
+        if: steps.rp.outputs.releases_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for tag in \
+            "${{ steps.rp.outputs['extensions/clean-space--tag_name'] }}" \
+            "${{ steps.rp.outputs['extensions/hardware--tag_name'] }}" \
+            "${{ steps.rp.outputs['extensions/photo-triage--tag_name'] }}" \
+            "${{ steps.rp.outputs['extensions/terminology--tag_name'] }}"; do
+            [ -n "$tag" ] || continue
+            plugin_id="${tag%-v*}"
+            echo "Dispatching release build for $tag (plugin: $plugin_id)"
+            gh workflow run release.yml --ref "$tag" -f "plugin_id=$plugin_id"
+          done
