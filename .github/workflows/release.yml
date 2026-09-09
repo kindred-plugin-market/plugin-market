@@ -74,12 +74,13 @@ jobs:
         working-directory: bench
         run: node scripts/plugins/pack-extension.mjs "$PLUGIN_ID" --out "$GITHUB_WORKSPACE/dist"
 
+      # release-please（release-please.yml）已创建带 changelog body 的 Release；
+      # 此处仅追加 zip 资产。不开启 generate_release_notes，避免覆盖其 body。
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.zip
-          generate_release_notes: true
 
       # workflow_dispatch（诊断用）在分支 ref 上运行，无法创建 Release，
       # 以 artifact 形式保留 zip 以便下载验证。

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    "extensions/clean-space": {
+      "release-type": "simple",
+      "component": "clean-space",
+      "extra-files": [
+        { "type": "json", "path": "manifest.json", "jsonpath": "$.version" }
+      ]
+    },
+    "extensions/hardware": {
+      "release-type": "simple",
+      "component": "hardware",
+      "extra-files": [
+        { "type": "json", "path": "manifest.json", "jsonpath": "$.version" }
+      ]
+    },
+    "extensions/photo-triage": {
+      "release-type": "simple",
+      "component": "photo-triage",
+      "extra-files": [
+        { "type": "json", "path": "manifest.json", "jsonpath": "$.version" }
+      ]
+    },
+    "extensions/terminology": {
+      "release-type": "simple",
+      "component": "terminology",
+      "extra-files": [
+        { "type": "json", "path": "manifest.json", "jsonpath": "$.version" }
+      ]
+    }
+  }
+}
