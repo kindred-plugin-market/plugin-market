@@ -56,6 +56,7 @@ jobs:
 
       - name: Place plugins into host workspace
         run: |
+          mkdir -p bench/extensions
           while IFS= read -r p; do
             rm -rf "bench/extensions/$p"
             cp -R "market/extensions/$p" "bench/extensions/$p"
