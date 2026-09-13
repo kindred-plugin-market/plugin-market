@@ -10,6 +10,8 @@
 | 插件 | 说明 | manifest 版本 |
 | --- | --- | --- |
 | [`token-calculator`](./extensions/token-calculator/) | Token 计算器：管理计费标准 / 按工作量·预算对比模型费用 / 估算文本 Token 与费用 | 1.0.0 |
+| [`quick-launch`](./extensions/quick-launch/) | 快捷启动：场景化应用启动网格（搜索/分类/拖拽排序/虚拟化） | 1.0.0 |
+| [`app-manager`](./extensions/app-manager/) | 应用管理：检查更新/升级/卸载/批量操作，复用同一份后端应用清单 | 1.0.0 |
 | [`photo-triage`](./extensions/photo-triage/) | 照片筛选：相册「留 / 删」快速分拣 | 0.1.0 |
 | [`terminology`](./extensions/terminology/) | 术语库：三层术语管理 + 搜索/置顶 | 1.0.0 |
 | [`hardware`](./extensions/hardware/) | 硬件查询：多品类参数对比（纯前端零 IPC） | 1.0.0 |

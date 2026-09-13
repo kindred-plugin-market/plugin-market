@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "app-manager",
+  "version": "1.0.0",
+  "display": {
+    "zh": "应用管理",
+    "en": "App Manager"
+  },
+  "description": {
+    "zh": "应用清单：检查更新、升级、卸载、批量操作与逐项结果",
+    "en": "App inventory: updates, upgrades, uninstall, batch ops with per-item results"
+  },
+  "distribution": "bundled",
+  "entry": {
+    "index": "index.html"
+  },
+  "acl": {
+    "commands": [
+      "scan_installed_apps",
+      "cancel_app_inventory_scan",
+      "get_cached_app_inventory",
+      "get_app_icon_base64",
+      "launch_app",
+      "reveal_app_in_finder",
+      "authorize_mac_app",
+      "check_managed_app_updates",
+      "upgrade_app",
+      "uninstall_app",
+      "batch_upgrade_apps",
+      "batch_uninstall_apps",
+      "install_app",
+      "cancel_batch_operation",
+      "check_all_app_updates",
+      "open_in_mac_app_store",
+      "open_in_mac_app_store_updates",
+      "install_app_update",
+      "cancel_app_update"
+    ]
+  },
+  "engines": {
+    "bench": ">=1.30.0"
+  }
+}

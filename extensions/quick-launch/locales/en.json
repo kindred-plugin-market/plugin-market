@@ -1,0 +1,125 @@
+{
+  "translation": {
+    "quickLaunch": {
+      "scene": {
+        "commonApps": "Common Apps",
+        "ai": "AI",
+        "dev": "Development",
+        "system": "System Tools",
+        "writing": "Writing",
+        "browser": "Browsers",
+        "communication": "Communication",
+        "design": "Design",
+        "entertainment": "Entertainment",
+        "other": "Other",
+        "aiIde": "AI Coding",
+        "aiAssistant": "AI Assistant",
+        "aiOffice": "AI Office",
+        "aiModel": "AI Model",
+        "aiClaw": "Claw",
+        "aiTool": "AI Tools"
+      },
+      "searchPlaceholder": "Search apps...",
+      "rescan": "Rescan",
+      "scanFirst": "Scan installed apps first",
+      "scanning": "Scanning apps...",
+      "restoring": "Restoring your last app list",
+      "scanStage": {
+        "scanning": "Scanning directories",
+        "resolving": "Resolving sources",
+        "processing": "Processing metadata"
+      },
+      "scanPartial": "Some application sources could not be scanned: {{providers}}. Existing results remain available.",
+      "empty": "No scanned apps yet. Go to App Manager to scan first, or click below.",
+      "totalApps": "{{count}} apps · {{scenes}} scenes",
+      "searchResult": "{{count}} apps found",
+      "noResults": "No matching apps",
+      "notLaunchable": "This application has no verified launch target",
+      "hint": "Click to launch · Right-click to reveal in Finder",
+      "edit": "Edit",
+      "done": "Done",
+      "resetClassification": "Reset to Default",
+      "exportOverrides": "Export Classification",
+      "moveToScene": "Move to",
+      "editModeHint": "Edit mode · Right-click an app to move it",
+      "toasts": {
+        "exportSuccess": "Exported classification for {{count}} apps",
+        "exportFailed": "Export failed",
+        "resetSuccess": "Classification reset to default",
+        "resetFailed": "Failed to reset classification",
+        "launchFailed": "Could not launch {{name}}",
+        "revealFailed": "Could not reveal {{name}}",
+        "scanFailed": "Could not scan installed applications",
+        "cancelFailed": "Could not cancel the application scan"
+      },
+      "errors": {
+        "scanFailed": "Installed application scan failed. Retry to refresh the inventory."
+      },
+      "resetConfirmTitle": "Reset to Default?",
+      "resetConfirmDescription": "This will remove all your custom app classification overrides.",
+      "resetConsequence": "All custom scene assignments will be lost. This cannot be undone.",
+      "time": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "daysAgo": "{{days}} days ago",
+        "weeksAgo": "{{weeks}} weeks ago",
+        "monthsAgo": "{{months}} months ago"
+      },
+      "showMore": "+{{count}} more",
+      "exportOverridesTooltip": "Developer tool: Export full classification data for rule optimization"
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "optional": "Optional",
+      "included": "Included",
+      "na": "—",
+      "withParenthesis": "{{prefix}} ({{detail}})",
+      "desktopOnly": "This feature is only available in the desktop version of Bench.",
+      "platformUnsupported": "This feature is not available on {{platform}}.",
+      "platformNames": {
+        "macos": "macOS",
+        "windows": "Windows",
+        "linux": "Linux"
+      },
+      "appTitle": "Bench - DevTools",
+      "close": "Close",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "save": "Save",
+      "enable": "Enable",
+      "disable": "Disable",
+      "add": "Add",
+      "edit": "Edit",
+      "persistence": {
+        "recovered": "Saved classifications were unreadable. A backup was kept and the defaults were restored.",
+        "newerSchema": "Saved classifications were created by a newer Bench version. Editing is disabled to protect them.",
+        "tooLarge": "Saved classifications exceed the safety limit. Editing is disabled until the data is reviewed."
+      },
+      "search": "Search",
+      "loading": "Loading...",
+      "filters": "Filters",
+      "failedToLoad": "Failed to load",
+      "loadFailed": "Failed to load",
+      "featureLoadFailed": "Failed to load {{feature}}",
+      "retry": "Retry",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "details": "Details",
+      "unknown": "Unknown",
+      "actions": {
+        "close": "Close"
+      },
+      "empty": {
+        "noData": "No items to display",
+        "selectItem": "Select an item to view details"
+      },
+      "refresh": "Refresh",
+      "clear": "Clear"
+    }
+  }
+}
