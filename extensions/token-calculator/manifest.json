@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "token-calculator",
+  "version": "1.0.0",
+  "display": {
+    "zh": "Token 计算器",
+    "en": "Token Calculator"
+  },
+  "description": {
+    "zh": "Token 计算器：管理计费标准、按工作量/预算对比模型费用、估算文本 Token 与费用",
+    "en": "Token Calculator: manage pricing standards, compare model costs by workload/budget, estimate tokens & cost"
+  },
+  "distribution": "bundled",
+  "entry": {
+    "index": "index.html"
+  },
+  "acl": {
+    "commands": [
+      "list_pricing_standards",
+      "create_pricing_standard",
+      "update_pricing_standard",
+      "delete_pricing_standard"
+    ]
+  },
+  "engines": {
+    "bench": ">=1.30.0"
+  }
+}

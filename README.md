@@ -9,6 +9,7 @@
 
 | 插件 | 说明 | manifest 版本 |
 | --- | --- | --- |
+| [`token-calculator`](./extensions/token-calculator/) | Token 计算器：管理计费标准 / 按工作量·预算对比模型费用 / 估算文本 Token 与费用 | 1.0.0 |
 | [`photo-triage`](./extensions/photo-triage/) | 照片筛选：相册「留 / 删」快速分拣 | 0.1.0 |
 | [`terminology`](./extensions/terminology/) | 术语库：三层术语管理 + 搜索/置顶 | 1.0.0 |
 | [`hardware`](./extensions/hardware/) | 硬件查询：多品类参数对比（纯前端零 IPC） | 1.0.0 |
