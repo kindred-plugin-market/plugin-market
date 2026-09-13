@@ -92,3 +92,31 @@ jobs:
           path: dist/*.zip
           retention-days: 14
           if-no-files-found: error
+
+      # 市场索引自持（P5）：zip 上传后把该版本 upsert 进 registry.json 并推回 main。
+      # Bench 每次打开市场都实时拉 registry.json → 推完即在插件中心可见，
+      # 无需改 Bench、无需手工维护 registry、无需发版宿主。
+      - name: Update market registry
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME##*-v}"
+          echo "Updating registry: ${PLUGIN_ID}@${version}"
+          cd market
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 从 main 最新状态开工（tag 可能落后于 main，避免把 main 推回旧提交）。
+          git fetch origin main --depth=1
+          git checkout -B main origin/main
+          node scripts/update-registry.mjs \
+            --plugin "$PLUGIN_ID" \
+            --version "$version" \
+            --dist "$GITHUB_WORKSPACE/dist"
+          git add registry.json
+          if git diff --cached --quiet; then
+            echo "registry.json unchanged"
+            exit 0
+          fi
+          git commit -m "chore(registry): publish ${PLUGIN_ID} v${version}"
+          git pull --rebase origin main
+          git push origin main

@@ -26,27 +26,38 @@ Tauri 命令 `browser_ext_export` 一键导出）。它经 Native Messaging
 **MCP server**（`bench-host mcp`，供 Claude / Cursor 等接入）。架构与实施
 细节见 `docs/implementation-playbook-mcp-and-browser.md`。
 
-## 发布一个插件
+## 发布一个插件（全自动）
+
+改动合并到 `main` 后无需任何手工步骤：
+
+1. 修改插件（Bench 仓库开发 → `pnpm run sync:ext-repos` 同步到本仓库）；
+2. 以 conventional commit 提交并 push 到 `main`；
+3. `release-please.yml` 自动维护 release PR（bump `manifest.json` 版本 + CHANGELOG）；
+4. 合并 PR → 自动打 `<pluginId>-v<version>` tag 并创建 Release → 接力 `release.yml`
+   构建 zip、上传资产、把该版本 **upsert** 进 `registry.json` 并推回 `main`。
+
+Bench 每次打开插件中心都实时拉本仓库的 `registry.json`（宿主常量
+`OFFICIAL_REGISTRY_URL`，可用 `BENCH_EXT_REGISTRY_URL` 覆盖），所以索引一推完，
+市场里就能看到新插件 / 新版本并点安装 —— **不用升级 Bench，也不用改 Bench 仓库**。
+
+## 新增一个插件
+
+只需要在 `extensions/<id>/` 建目录（含 `manifest.json`）。push 到 `main` 后
+`scripts/sync-release-please.mjs` 自动把它登记进 `release-please-config.json` 与
+`.release-please-manifest.json`（既有包的自定义配置保留），随后走上面的发版流程。
+
+## registry.json 手工维护（兜底）
+
+需要重算或修正索引时在本仓库执行：
 
 ```bash
-# 1. 修改对应插件（Bench 仓库开发 → pnpm run sync:ext-repos 同步到本仓库）
-# 2. 更新该插件 manifest.json 的 version
-# 3. 打 tag 推送
-git tag photo-triage-v0.1.1
-git push origin photo-triage-v0.1.1
-# CI 自动：构建 → 发布 Release；随后在 Bench 仓库更新 registry.json（sha256）
+node scripts/update-registry.mjs --all --skip-missing          # 从 Release 资产重算 sha256/size
+node scripts/update-registry.mjs --all --check                 # 只校验、不落盘
+node scripts/update-registry.mjs --plugin <id> --zip <file>    # 用本地 zip 登记
 ```
 
-## registry.json 维护
-
-在 Bench 仓库执行：
-
-```bash
-pnpm run update:ext-registry -- --market ~/Documents/github/kindred-plugin-market/plugin-market
-```
-
-（脚本会对每个插件跑 pack 取 sha256/size，重写 `registry.json`；commit + push 后
-Bench 端市场立即可见新版本。）
+upsert 语义：只动目标插件的目标版本，保留其他插件、历史版本，以及人工标注的
+`yanked` / `revoked`。
 
 ## CI 密钥
 

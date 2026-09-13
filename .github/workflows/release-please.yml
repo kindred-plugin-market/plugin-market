@@ -28,6 +28,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 新增插件自动登记：extensions/ 下出现新目录即补进 config / manifest，
+      # 使本次 release-please 就能识别（不必手改 release-please-config.json）。
+      - name: Sync release-please config
+        run: |
+          set -euo pipefail
+          node scripts/sync-release-please.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release-please-config.json .release-please-manifest.json
+          if git diff --cached --quiet; then
+            echo "release-please config in sync"
+            exit 0
+          fi
+          git commit -m "chore: register plugins with release-please"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
       - name: Run release-please
         id: rp
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
@@ -45,13 +67,14 @@ jobs:
         if: steps.rp.outputs.releases_created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          RP_OUTPUTS: ${{ toJSON(steps.rp.outputs) }}
         run: |
-          for tag in \
-            "${{ steps.rp.outputs['extensions/clean-space--tag_name'] }}" \
-            "${{ steps.rp.outputs['extensions/hardware--tag_name'] }}" \
-            "${{ steps.rp.outputs['extensions/photo-triage--tag_name'] }}" \
-            "${{ steps.rp.outputs['extensions/terminology--tag_name'] }}"; do
-            [ -n "$tag" ] || continue
+          set -euo pipefail
+          # 动态遍历 release-please 输出的所有 <package>--tag_name：
+          # 新增插件无需改本文件（包清单由 sync-release-please.mjs 维护）。
+          tags=$(echo "$RP_OUTPUTS" | jq -r 'to_entries | map(select((.key | endswith("--tag_name")) and .value != null and .value != "")) | .[].value')
+          [ -n "$tags" ] || { echo "no tag resolved from release-please outputs"; exit 1; }
+          for tag in $tags; do
             plugin_id="${tag%-v*}"
             echo "Dispatching release build for $tag (plugin: $plugin_id)"
             gh workflow run release.yml --ref "$tag" -f "plugin_id=$plugin_id"

@@ -42,6 +42,14 @@ jobs:
         working-directory: bench
         run: pnpm install --frozen-lockfile
 
+      # 提示性校验：extensions/ 与 release-please 配置是否一致。
+      # 真正同步由 release-please.yml 完成并推回 main（此处不 push，避免并发冲突）。
+      - name: Check release-please config sync
+        working-directory: market
+        run: |
+          node scripts/sync-release-please.mjs --check \
+            || echo "::warning::release-please config out of sync; auto-fixed by release-please workflow"
+
       - name: Collect plugin ids
         run: |
           plugins=()
