@@ -1,7 +1,34 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-13T16:52:34Z",
+  "updatedAt": "2026-09-13T16:55:16Z",
   "extensions": [
+    {
+      "id": "app-manager",
+      "display": {
+        "zh": "应用管理",
+        "en": "App Manager"
+      },
+      "description": {
+        "zh": "应用清单：检查更新、升级、卸载、批量操作与逐项结果",
+        "en": "App inventory: updates, upgrades, uninstall, batch ops with per-item results"
+      },
+      "publisher": {
+        "name": "Kindred Plugin Market"
+      },
+      "versions": [
+        {
+          "version": "1.0.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/app-manager-v1.0.1/bench-ext-app-manager-v1.0.1.zip",
+          "sha256": "db20b0a9299bf30ac87c7876701242d36a9d57e0059e0d608c0d3744459e2b93",
+          "size": 267114,
+          "publishedAt": "2026-09-13T16:55:16Z",
+          "yanked": false
+        }
+      ]
+    },
     {
       "id": "clean-space",
       "display": {
@@ -133,6 +160,33 @@
           "sha256": "bee486b1106e4f21c73ed19fb65e76e5c163c5cc447f0c33ac50593ea6930412",
           "size": 180683,
           "publishedAt": "2026-09-08T17:33:01Z",
+          "yanked": false
+        }
+      ]
+    },
+    {
+      "id": "token-calculator",
+      "display": {
+        "zh": "Token 计算器",
+        "en": "Token Calculator"
+      },
+      "description": {
+        "zh": "Token 计算器：管理计费标准、按工作量/预算对比模型费用、估算文本 Token 与费用",
+        "en": "Token Calculator: manage pricing standards, compare model costs by workload/budget, estimate tokens & cost"
+      },
+      "publisher": {
+        "name": "Kindred Plugin Market"
+      },
+      "versions": [
+        {
+          "version": "1.1.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/token-calculator-v1.1.1/bench-ext-token-calculator-v1.1.1.zip",
+          "sha256": "b44e32965cd01eb3ad63e76d6bec0919f2f6b8300941629421d1985752c14aac",
+          "size": 163478,
+          "publishedAt": "2026-09-13T16:55:16Z",
           "yanked": false
         }
       ]
