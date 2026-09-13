@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "token-calculator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "display": {
     "zh": "Token 计算器",
     "en": "Token Calculator"
