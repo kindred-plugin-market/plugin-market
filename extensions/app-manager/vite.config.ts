@@ -1,26 +1,34 @@
 import { defineConfig } from "vite"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
+import react from "@vitejs/plugin-react"
+import path from "path"
 
-const dir = path.dirname(fileURLToPath(import.meta.url))
-const hostSrc = path.resolve(dir, "../../../tauri-app/src")
-
+/**
+ * app-manager 插件独立构建（从 Bench 内置功能迁移，D 系列）。
+ *
+ * - `@`          → 宿主主包 src（复用 components/ui、lib/tauri、styles，随 bundle 打包）；
+ * - `@extension` → 插件自身源码（extensions/app-manager/src）；
+ * - 产物 outDir = `assets/`（经 extensions:stage 打进 resources，或 extensions:sync 同步运行时）；
+ * - `base: "./"` 是硬性要求（子路径部署 404 铁律）。
+ */
 export default defineConfig({
-  root: dir,
+  root: import.meta.dirname,
   base: "./",
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": hostSrc,
-      "@/i18n/config": path.join(hostSrc, "i18n/config"),
-      "@extension": path.join(dir, "src"),
+      // ⚠️ 顺序铁律：vite alias 按声明顺序匹配，"@" 是前缀规则（"@" + "/"），
+      // 必须把更具体的 "@/i18n/config" 放在 "@" **之前**，否则会被 "@" 截胡
+      // （P5 教训：别名放在 "@" 之后 = 完全不生效，宿主 config 混入插件
+      // bundle 并覆盖插件 i18n 实例，t() 全部返回 key 原文）。
+      "@/i18n/config": path.resolve(import.meta.dirname, "./src/i18n.ts"),
+      "@": path.resolve(import.meta.dirname, "../../src"),
+      "@extension": path.resolve(import.meta.dirname, "./src"),
     },
   },
   build: {
-    outDir: path.resolve(dir, "../../../tauri-app/src-tauri/extensions/app-manager/dist"),
+    outDir: "assets",
+    assetsDir: "bundle",
     emptyOutDir: true,
-    rollupOptions: {
-      input: path.join(dir, "index.html"),
-    },
+    chunkSizeWarningLimit: 1500,
   },
-  optimizeDeps: { exclude: ["@extension"] },
 })
