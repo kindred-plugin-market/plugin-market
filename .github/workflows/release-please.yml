@@ -29,6 +29,9 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  # `gh workflow run`（接力 release.yml / self-dispatch 打 tag）需要 actions: write；
+  # 缺失时 dispatch 报 403 Resource not accessible by integration。
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
