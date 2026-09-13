@@ -103,60 +103,60 @@
         "deleteFailed": "Failed to delete pricing standard",
         "duplicateName": "A standard with this name already exists",
         "loadFailed": "Failed to load pricing standards"
-        },
-        "common": {
-          "yes": "Yes",
-          "no": "No",
-          "none": "None",
-          "optional": "Optional",
-          "included": "Included",
-          "na": "—",
-          "withParenthesis": "{{prefix}} ({{detail}})",
-          "desktopOnly": "This feature is only available in the desktop version of Bench.",
-          "platformUnsupported": "This feature is not available on {{platform}}.",
-          "platformNames": {
-            "macos": "macOS",
-            "windows": "Windows",
-            "linux": "Linux"
-          },
-          "appTitle": "Bench - DevTools",
-          "close": "Close",
-          "cancel": "Cancel",
-          "remove": "Remove",
-          "delete": "Delete",
-          "confirm": "Confirm",
-          "save": "Save",
-          "enable": "Enable",
-          "disable": "Disable",
-          "add": "Add",
-          "edit": "Edit",
-          "persistence": {
-            "recovered": "Saved classifications were unreadable. A backup was kept and the defaults were restored.",
-            "newerSchema": "Saved classifications were created by a newer Bench version. Editing is disabled to protect them.",
-            "tooLarge": "Saved classifications exceed the safety limit. Editing is disabled until the data is reviewed."
-          },
-          "search": "Search",
-          "loading": "Loading...",
-          "filters": "Filters",
-          "failedToLoad": "Failed to load",
-          "loadFailed": "Failed to load",
-          "featureLoadFailed": "Failed to load {{feature}}",
-          "retry": "Retry",
-          "success": "Success",
-          "error": "Error",
-          "warning": "Warning",
-          "details": "Details",
-          "unknown": "Unknown",
-          "actions": {
-            "close": "Close"
-          },
-          "empty": {
-            "noData": "No items to display",
-            "selectItem": "Select an item to view details"
-          },
-          "refresh": "Refresh",
-          "clear": "Clear"
-        }
-        }
-        }
+      }
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "optional": "Optional",
+      "included": "Included",
+      "na": "—",
+      "withParenthesis": "{{prefix}} ({{detail}})",
+      "desktopOnly": "This feature is only available in the desktop version of Bench.",
+      "platformUnsupported": "This feature is not available on {{platform}}.",
+      "platformNames": {
+        "macos": "macOS",
+        "windows": "Windows",
+        "linux": "Linux"
+      },
+      "appTitle": "Bench - DevTools",
+      "close": "Close",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "save": "Save",
+      "enable": "Enable",
+      "disable": "Disable",
+      "add": "Add",
+      "edit": "Edit",
+      "persistence": {
+        "recovered": "Saved classifications were unreadable. A backup was kept and the defaults were restored.",
+        "newerSchema": "Saved classifications were created by a newer Bench version. Editing is disabled to protect them.",
+        "tooLarge": "Saved classifications exceed the safety limit. Editing is disabled until the data is reviewed."
+      },
+      "search": "Search",
+      "loading": "Loading...",
+      "filters": "Filters",
+      "failedToLoad": "Failed to load",
+      "loadFailed": "Failed to load",
+      "featureLoadFailed": "Failed to load {{feature}}",
+      "retry": "Retry",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "details": "Details",
+      "unknown": "Unknown",
+      "actions": {
+        "close": "Close"
+      },
+      "empty": {
+        "noData": "No items to display",
+        "selectItem": "Select an item to view details"
+      },
+      "refresh": "Refresh",
+      "clear": "Clear"
+    }
+  }
 }
