@@ -23,6 +23,11 @@ on:
     branches: [main]
   pull_request:
     types: [closed]
+  # 兜底：release PR 由 GITHUB_TOKEN 合并时不会触发任何事件（防递归），
+  # 打 tag 那一环只能等下一次运行。定时重跑让闭环不依赖人工 push
+  # （未配置 RELEASE_PLEASE_TOKEN 时的兜底；rp 无待发版本时是空转）。
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
