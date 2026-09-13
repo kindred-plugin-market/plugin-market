@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "app-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "display": {
     "zh": "应用管理",
     "en": "App Manager"
