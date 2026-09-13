@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-08T17:33:01Z",
+  "updatedAt": "2026-09-13T16:52:34Z",
   "extensions": [
     {
       "id": "clean-space",
@@ -79,6 +79,33 @@
           "sha256": "6c23fe9e9b4084d4660620c52c71afb2fa604c07e7cd4f295216693fb83633a5",
           "size": 171416,
           "publishedAt": "2026-09-08T17:33:00Z",
+          "yanked": false
+        }
+      ]
+    },
+    {
+      "id": "quick-launch",
+      "display": {
+        "zh": "快捷启动",
+        "en": "Quick Launch"
+      },
+      "description": {
+        "zh": "场景化应用启动网格：搜索、分类、拖拽排序、用户覆盖与虚拟化应用网格",
+        "en": "Scenario-based app launcher grid: search, classify, drag-reorder, overrides & virtualized grid"
+      },
+      "publisher": {
+        "name": "Kindred Plugin Market"
+      },
+      "versions": [
+        {
+          "version": "1.0.2",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/quick-launch-v1.0.2/bench-ext-quick-launch-v1.0.2.zip",
+          "sha256": "60d292b8b2023e480fc24175ff480996df23b3928a7ef4f9146b39f3fe1ef095",
+          "size": 215130,
+          "publishedAt": "2026-09-13T16:52:34Z",
           "yanked": false
         }
       ]
