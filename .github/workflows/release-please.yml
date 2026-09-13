@@ -1,22 +1,33 @@
 name: Release Please
 
-# 参考 Bench 宿主仓库同款设计（manifest 多包模式，按插件独立发版）：
-# main 收到 conventional commits（feat/fix 等且触及 extensions/<id>/）→
-# 自动维护各插件 release PR（bump manifest.json 版本 + 生成 CHANGELOG.md）
-# → 人工合并 PR 后自动打 <pluginId>-v<version> tag 并创建 GitHub Release
-# → 由下方 Trigger 步骤接力触发 release.yml 构建上传 zip 资产。
+# 推送即发版（零手工）：main 收到 conventional commits（feat/fix 等且触及
+# extensions/<id>/）→ release-please 自动维护各插件 release PR（bump
+# manifest.json 版本 + 生成 CHANGELOG.md）→ 本 workflow 给 release PR 开启
+# **自动合并** → 合并后 release-please 自动打 <pluginId>-v<version> tag 并创建
+# GitHub Release → Trigger 步骤接力 release.yml 构建 zip + 写 registry.json。
 #
-# token 说明：组织策略禁止寿命 >366 天的 fine-grained PAT 访问本仓库 API，
-# 故统一使用 github.token（可建 PR / 打 tag / 建 Release）。github.token 产生
-# 的 tag push 不会触发其他 workflow（GitHub 防递归），但 workflow_dispatch
-# 是官方明确例外 —— 因此用 `gh workflow run --ref <tag>` 逐插件接力发布。
+# 全过程无需人工干预：不打 tag、不点合并、不改 Bench。
+#
+# token 说明：
+# - 默认 github.token（可建 PR / 打 tag / 建 Release / 合并 PR）；组织策略禁止
+#   寿命 >366 天的 fine-grained PAT 访问本仓库 API，故不强依赖 PAT。
+# - github.token 产生的 tag push 不会触发其他 workflow（GitHub 防递归），但
+#   workflow_dispatch 是官方明确例外 —— 因此用 `gh workflow run --ref <tag>`
+#   逐插件接力发布；release PR 合并同理，用 pull_request.closed + self-dispatch
+#   接力（见 tag-after-merge job）。
+# - 若配置了 `RELEASE_PLEASE_TOKEN`（≤366 天的 fine-grained PAT，仅本仓库
+#   contents/pull-requests 写权限），则合并产生的 push 会正常触发 workflow，
+#   闭环更快；未配置时靠 self-dispatch 兜底，行为一致。
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [closed]
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -25,6 +36,7 @@ concurrency:
 
 jobs:
   release-please:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -50,14 +62,53 @@ jobs:
           git pull --rebase origin main
           git push origin HEAD:main
 
+      # 诊断提示：GITHUB_TOKEN 建 PR 依赖仓库开关「Allow GitHub Actions to create
+      # and approve pull requests」；组织策略禁用时该开关是灰的，此时必须改用
+      # RELEASE_PLEASE_TOKEN（≤366 天 fine-grained PAT）才能创建 release PR。
+      - name: Report release token mode
+        env:
+          HAS_PAT: ${{ secrets.RELEASE_PLEASE_TOKEN != '' }}
+        run: |
+          if [ "$HAS_PAT" = "true" ]; then
+            echo "使用 RELEASE_PLEASE_TOKEN（PAT 模式）"
+          else
+            echo "::warning::未配置 RELEASE_PLEASE_TOKEN，回退 GITHUB_TOKEN。若日志出现 “GitHub Actions is not permitted to create or approve pull requests”，说明组织策略禁用了该开关（仓库设置里呈灰色），请改用 PAT。"
+          fi
+
       - name: Run release-please
         id: rp
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: main
+
+      # 免手工合并：给本次创建/更新的 release PR 开启 auto-merge。
+      # 前提：仓库 Settings → General 勾选 "Allow auto-merge"（无 admin 权限时
+      # 下面的 API 尝试会失败并忽略，随后回退为直接 squash 合并）。
+      - name: Auto-merge release PRs
+        if: steps.rp.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          PRS: ${{ steps.rp.outputs.prs || '[]' }}
+        run: |
+          set -euo pipefail
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}" -f allow_auto_merge=true >/dev/null 2>&1 || true
+          # 逐条处理（避免 IFS/空白字段解析踩坑）。
+          echo "$PRS" | jq -c '.[]' | while read -r pr; do
+            number=$(echo "$pr" | jq -r '.number // empty')
+            branch=$(echo "$pr" | jq -r '.headBranchName // empty')
+            # 兜底：number 缺失时按 head branch 反查（release-please PR 对象字段可能变动）。
+            if [ -z "$number" ] && [ -n "$branch" ]; then
+              number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+            fi
+            [ -n "$number" ] || { echo "::warning::无法定位 release PR（head=$branch）"; continue; }
+            echo "Auto-merging release PR #${number}"
+            gh pr merge --auto --squash "$number" \
+              || gh pr merge --squash "$number" \
+              || echo "::warning::无法自动合并 PR #${number}，请手工合并"
+          done
 
       # 逐插件以 tag ref 触发 release.yml（workflow_dispatch 支持以 tag 为
       # ref，此时其内部 github.ref = refs/tags/<tag>，tag 匹配、插件 id 解析
@@ -66,7 +117,7 @@ jobs:
       - name: Trigger release workflow for each released tag
         if: steps.rp.outputs.releases_created == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           RP_OUTPUTS: ${{ toJSON(steps.rp.outputs) }}
         run: |
           set -euo pipefail
@@ -79,3 +130,22 @@ jobs:
             echo "Dispatching release build for $tag (plugin: $plugin_id)"
             gh workflow run release.yml --ref "$tag" -f "plugin_id=$plugin_id"
           done
+
+  # release PR 合并 → 通知 release-please 打 tag。GITHUB_TOKEN 执行的合并不会
+  # 触发 push workflow（防递归），故显式 self-dispatch 一次（workflow_dispatch
+  # 是官方例外）。配置了 RELEASE_PLEASE_TOKEN 时本 job 属于冗余但无害：
+  # release-please 重复运行是幂等的（无待发版本则什么都不做）。
+  tag-after-merge:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.head_ref, 'release-please--branches--main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Re-run release-please to tag the merged release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+        run: gh workflow run release-please.yml --ref main

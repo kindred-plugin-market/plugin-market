@@ -26,15 +26,24 @@ Tauri 命令 `browser_ext_export` 一键导出）。它经 Native Messaging
 **MCP server**（`bench-host mcp`，供 Claude / Cursor 等接入）。架构与实施
 细节见 `docs/implementation-playbook-mcp-and-browser.md`。
 
-## 发布一个插件（全自动）
+## 发布一个插件（推送即发版，零手工）
 
-改动合并到 `main` 后无需任何手工步骤：
+改动 push 到 `main` 后无需任何手工步骤（不打 tag、不点合并）：
 
 1. 修改插件（Bench 仓库开发 → `pnpm run sync:ext-repos` 同步到本仓库）；
-2. 以 conventional commit 提交并 push 到 `main`；
-3. `release-please.yml` 自动维护 release PR（bump `manifest.json` 版本 + CHANGELOG）；
-4. 合并 PR → 自动打 `<pluginId>-v<version>` tag 并创建 Release → 接力 `release.yml`
-   构建 zip、上传资产、把该版本 **upsert** 进 `registry.json` 并推回 `main`。
+2. 以 conventional commit（`feat:` / `fix:` / `feat!:`）提交并 push 到 `main`；
+3. `release-please.yml` 自动创建/更新 release PR（bump `manifest.json` 版本 + CHANGELOG）
+   并给它开启 **auto-merge**（合并失败时回退为直接 squash 合并）；
+4. 合并后 release-please 自动打 `<pluginId>-v<version>` tag 并创建 GitHub Release
+   → 接力 `release.yml` 构建 zip、上传资产、把该版本 **upsert** 进 `registry.json` 并推回 `main`。
+
+### 一次前置设置（仓库 Settings）
+
+- General → 勾选 **Allow auto-merge**（workflow 会尝试用 API 自动开启；无 admin 权限时忽略并回退直接合并）
+- Actions → General → 勾选 **Allow GitHub Actions to create and approve pull requests**
+- 可选：配置 secret `RELEASE_PLEASE_TOKEN`（≤366 天的 fine-grained PAT，仅本仓库
+  contents/pull-requests 写权限）。用它时 PR 合并产生的 push 会正常触发 workflow，闭环更快；
+  不配也能跑（`pull_request.closed` → self-dispatch 兜底，行为一致）。
 
 Bench 每次打开插件中心都实时拉本仓库的 `registry.json`（宿主常量
 `OFFICIAL_REGISTRY_URL`，可用 `BENCH_EXT_REGISTRY_URL` 覆盖），所以索引一推完，
