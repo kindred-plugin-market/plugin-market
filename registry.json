@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-13T16:55:16Z",
+  "updatedAt": "2026-09-13T17:16:10Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -16,6 +16,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.0.2",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/app-manager-v1.0.2/bench-ext-app-manager-v1.0.2.zip",
+          "sha256": "f1aec1c4e40d4515ffcff3727fda1c5ab4d416e7acd08359765c125976b12d74",
+          "size": 270057,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
         {
           "version": "1.0.1",
           "engines": {
@@ -44,6 +55,17 @@
       },
       "versions": [
         {
+          "version": "1.0.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/clean-space-v1.0.1/bench-ext-clean-space-v1.0.1.zip",
+          "sha256": "551e3000e20ab6a3768a93076b3f1097f552d465affa94e6b6967a6fd3e01a27",
+          "size": 200267,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
+        {
           "version": "1.0.0",
           "engines": {
             "bench": ">=1.30.0"
@@ -70,6 +92,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.0.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/hardware-v1.0.1/bench-ext-hardware-v1.0.1.zip",
+          "sha256": "03ace1f82882f773c4476fd5b1ecba0464f5c9f651a1c011f8f4cd92734bf63f",
+          "size": 254796,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
         {
           "version": "1.0.0",
           "engines": {
@@ -98,6 +131,17 @@
       },
       "versions": [
         {
+          "version": "0.1.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/photo-triage-v0.1.1/bench-ext-photo-triage-v0.1.1.zip",
+          "sha256": "fecff6456b9d4c87bb7188c6680a271a615253e7fa79a8a1546d20ffbee7dce2",
+          "size": 173373,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
+        {
           "version": "0.1.0",
           "engines": {
             "bench": ">=1.30.0"
@@ -124,6 +168,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.0.3",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/quick-launch-v1.0.3/bench-ext-quick-launch-v1.0.3.zip",
+          "sha256": "7ec8e3b6c8f9bbe559beee88f157ab4d14bb8110176fb54a8cd022a9902c74f0",
+          "size": 218603,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
         {
           "version": "1.0.2",
           "engines": {
@@ -152,6 +207,17 @@
       },
       "versions": [
         {
+          "version": "1.0.1",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/terminology-v1.0.1/bench-ext-terminology-v1.0.1.zip",
+          "sha256": "04d0c10d4211334bc65d46c65cf15fe57e68088dd5e98993691f9e40cb82f350",
+          "size": 181609,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
+        {
           "version": "1.0.0",
           "engines": {
             "bench": ">=1.30.0"
@@ -178,6 +244,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.1.2",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/token-calculator-v1.1.2/bench-ext-token-calculator-v1.1.2.zip",
+          "sha256": "c9945d2dc030939a0f24090c9486b39cf2b94c6b55c67e46f7696bd1dc866568",
+          "size": 167172,
+          "publishedAt": "2026-09-13T17:16:10Z",
+          "yanked": false
+        },
         {
           "version": "1.1.1",
           "engines": {
