@@ -1,6 +1,6 @@
 # photo-triage（照片筛选）
 
-> **形态**：bundled 插件（[D-024](../../../../docs/DECISIONS.md#d-024--extension-仓库组织与-photo-triage-试点拆法)，P2b 迁出）。
+> **形态**：bundled 插件（[D-024](../../../../../tauri-app/docs/explanation/decisions.md#d-024--extension-仓库组织与-photo-triage-试点拆法)，P2b 迁出）。
 > 源码：`extensions/photo-triage/`（本目录即插件根）；能力面：15 条 `photo_triage_*` 命令留宿主核心（`src-tauri/src/photo_triage/`）。
 > 本目录为该插件的模块文档入口（与 `src/features` 模块同等参与 docs 对齐门禁）。
 
@@ -15,4 +15,4 @@
 ## 文档
 
 - [roadmap.md](./roadmap.md) — 当前状态与未完成项
-- 契约：[extension-spec.md](../../../docs/extension-spec.md)；工作流：[extension-workflow.md](../../../docs/extension-workflow.md)
+- 契约：[extension-spec.md](../../../../../tauri-app/docs/reference/extension-spec.md)；工作流：[extension-workflow.md](../../../../../tauri-app/docs/explanation/extension-workflow.md)
