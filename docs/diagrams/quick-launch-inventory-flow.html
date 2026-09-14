@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quick Launch 共享清单与场景化启动 · 交互架构图</title>
+    <style>
+      :root {
+        --bg: #f4f2ec;
+        --ink: #26262a;
+        --muted: #7d7b74;
+        --line: #e2dfd5;
+        --card: #ffffff;
+        --blue: #185fa5;
+        --green: #0f6e56;
+        --orange: #854f0b;
+        --purple: #534ab7;
+        --ok: #3b6d11;
+        --radius: 16px;
+        --shadow: 0 6px 22px rgba(60, 55, 40, 0.1);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
+      body {
+        height: 100vh; height: 100dvh; overflow: hidden;
+        display: flex; flex-direction: column;
+        background:
+          radial-gradient(circle at 1px 1px, rgba(60, 55, 40, 0.05) 1px, transparent 0) 0 0 / 22px 22px,
+          linear-gradient(180deg, #f7f5f0 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 18px 22px 14px;
+      }
+      .topbar { flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px 24px; flex-wrap: wrap; margin-bottom: 12px; }
+      .topbar h1 { font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-size: 22px; color: #1f1f22; display: flex; align-items: center; gap: 10px; }
+      .topbar h1::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--blue), var(--purple)); box-shadow: 0 0 0 4px rgba(83, 74, 183, 0.12); }
+      .topbar .sub { margin-top: 6px; font-size: 12.5px; color: var(--muted); max-width: 720px; line-height: 1.5; }
+      .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .chip { font-size: 12px; color: #55534c; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+      .chip i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 6px; vertical-align: middle; }
+      button.btn { font: inherit; font-size: 12.5px; cursor: pointer; border: 1px solid var(--line); background: #fff; color: #33312c; border-radius: 9px; padding: 7px 12px; transition: background .15s, border-color .15s; }
+      button.btn:hover { background: #f1efe8; border-color: #cfcbbd; }
+      .workspace { position: relative; flex: 1; min-height: 0; display: flex; }
+      .stage-scroll { flex: 1; min-width: 0; overflow: auto; position: relative; }
+      .stage { position: relative; width: 1120px; height: 640px; margin: 0 auto; transform-origin: top center; }
+      svg.edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+      svg.edges path.hit { pointer-events: stroke; stroke: transparent; stroke-width: 16; fill: none; cursor: pointer; }
+      .node { position: absolute; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 14px; cursor: pointer; border-left: 5px solid var(--blue); transition: transform .12s, box-shadow .15s, outline .1s; outline: none; }
+      .node:hover, .node:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(60,55,40,0.16); outline: 2px solid var(--blue); outline-offset: 2px; }
+      .node.dim { opacity: 0.32; }
+      .node .name { font-size: 14px; font-weight: 600; color: #1f1f22; }
+      .node .desc { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+      .node .badge { display: inline-block; font-size: 10.5px; margin-top: 7px; padding: 2px 8px; border-radius: 999px; background: #f0eee7; color: #6a675e; }
+      .node.host { border-left-color: var(--orange); background: #fbf6ee; }
+      .edge-badge { position: absolute; transform: translate(-50%, -50%); background: #fff; border: 1px solid var(--line); border-radius: 999px; font-size: 11px; font-weight: 600; color: #4a463d; padding: 2px 8px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+      .edge-badge:hover, .edge-badge:focus-visible { background: #fbf3e6; outline: 2px solid var(--orange); }
+      .scenarios { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 2px; }
+      .scenarios .lbl { font-size: 12px; color: var(--muted); align-self: center; margin-right: 2px; }
+      .drawer { position: absolute; top: 0; right: 0; width: 440px; max-width: 92vw; height: 100%; background: #fff; border-left: 1px solid var(--line); box-shadow: -8px 0 28px rgba(60,55,40,0.12); transform: translateX(100%); transition: transform .22s ease; display: flex; flex-direction: column; z-index: 5; }
+      .drawer.open { transform: translateX(0); }
+      .drawer header { flex-shrink: 0; padding: 16px 18px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+      .drawer header h2 { font-size: 16px; color: #1f1f22; }
+      .drawer header .kind { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+      .drawer .close { border: 0; background: #f0eee7; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: #4a463d; }
+      .tabs { flex-shrink: 0; display: flex; gap: 4px; padding: 10px 14px 0; border-bottom: 1px solid var(--line); }
+      .tab { font: inherit; font-size: 12.5px; border: 0; background: transparent; color: var(--muted); padding: 8px 10px; cursor: pointer; border-bottom: 2px solid transparent; }
+      .tab[aria-selected="true"] { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+      .drawer .body { flex: 1; overflow: auto; padding: 16px 18px 22px; font-size: 13px; line-height: 1.7; color: #35332e; }
+      .drawer .body h3 { font-size: 13px; color: #1f1f22; margin: 14px 0 6px; }
+      .drawer .body h3:first-child { margin-top: 0; }
+      .drawer .body ul { padding-left: 18px; }
+      .drawer .body code { background: #f3f1ea; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+      .legend { flex-shrink: 0; font-size: 11px; color: var(--muted); padding: 6px 0 0; display: flex; gap: 14px; flex-wrap: wrap; }
+      .legend span { display: inline-flex; align-items: center; gap: 5px; }
+      .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+      @media (max-width: 820px) { .stage { transform: scale(0.78); } }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div>
+        <h1 id="title">Quick Launch 共享清单与场景化启动</h1>
+        <div class="sub" id="subtitle">
+          插件只负责搜索、分类、用户覆盖与启动交互；清单、图标与 revision 由宿主共享
+          App Manager inventory 提供。前端只传 appId，不可启动项不进可点击场景。
+        </div>
+      </div>
+      <div class="controls">
+        <span class="chip"><i style="background: var(--blue)"></i><span id="owner">所有者：插件 quick-launch</span></span>
+        <button class="btn" id="langBtn" aria-pressed="false">EN</button>
+      </div>
+    </div>
+
+    <div class="scenarios" id="scenarios" role="group" aria-label="场景">
+      <span class="lbl" id="sceneLbl">场景：</span>
+    </div>
+
+    <div class="workspace">
+      <div class="stage-scroll">
+        <div class="stage" id="stage">
+          <svg class="edges" id="edges" aria-hidden="true"></svg>
+          <div class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="drawerTitle" tabindex="-1">
+            <header>
+              <div>
+                <h2 id="drawerTitle">详情</h2>
+                <div class="kind" id="drawerKind"></div>
+              </div>
+              <button class="close" id="drawerClose" aria-label="关闭">×</button>
+            </header>
+            <div class="tabs" role="tablist" id="tabs">
+              <button class="tab" role="tab" id="tab-flow" aria-selected="true" data-tab="flow">流程</button>
+              <button class="tab" role="tab" id="tab-tech" aria-selected="false" data-tab="tech">技术实现</button>
+              <button class="tab" role="tab" id="tab-risk" aria-selected="false" data-tab="risk">限制与风险</button>
+              <button class="tab" role="tab" id="tab-plan" aria-selected="false" data-tab="plan">后续规划</button>
+            </div>
+            <div class="body" id="drawerBody" role="tabpanel" tabindex="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend" id="legend">
+      <span><i style="background: var(--blue)"></i><span id="lg-blue">插件前端</span></span>
+      <span><i style="background: var(--green)"></i><span id="lg-green">快照 / 资源</span></span>
+      <span><i style="background: var(--purple)"></i><span id="lg-purple">分类 / 规则</span></span>
+      <span><i style="background: var(--orange)"></i><span id="lg-orange">宿主能力</span></span>
+    </div>
+
+    <script>
+      const UI = {
+        zh: {
+          title: "Quick Launch 共享清单与场景化启动",
+          subtitle:
+            "插件只负责搜索、分类、用户覆盖与启动交互；清单、图标与 revision 由宿主共享 App Manager inventory 提供。前端只传 appId，不可启动项不进可点击场景。",
+          owner: "所有者：插件 quick-launch",
+          sceneLbl: "场景：",
+          lgBlue: "插件前端",
+          lgGreen: "快照 / 资源",
+          lgPurple: "分类 / 规则",
+          lgOrange: "宿主能力",
+        },
+        en: {
+          title: "Quick Launch — Shared Inventory & Scenario Launch",
+          subtitle:
+            "The plugin only handles search, classify, user overrides and launch UX; inventory, icons and revision come from the host's shared App Manager inventory. The frontend passes only appId; non-launchable items are never clickable.",
+          owner: "Owner: plugin quick-launch",
+          sceneLbl: "Scenarios:",
+          lgBlue: "Plugin frontend",
+          lgGreen: "Snapshot / Asset",
+          lgPurple: "Classify / Rule",
+          lgOrange: "Host capability",
+        },
+      }
+
+      const NODES = {
+        classify: { x: 40, y: 70, w: 230, h: 96, color: "purple",
+          zh: { name: "场景分类 / override / order", desc: "classification-engine + scenes.ts 与用户覆盖", badge: "classify" },
+          en: { name: "Scenario classify / override / order", desc: "classification-engine + scenes.ts and user overrides", badge: "classify" } },
+        controller: { x: 430, y: 70, w: 230, h: 96, color: "blue",
+          zh: { name: "插件 Controller / Store", desc: "useQuickLaunchController；仅状态+简单 setter", badge: "frontend" },
+          en: { name: "Plugin Controller / Store", desc: "useQuickLaunchController; state + simple setters only", badge: "frontend" } },
+        launch: { x: 820, y: 60, w: 220, h: 120, color: "orange", host: true,
+          zh: { name: "appId 操作边界", desc: "launch_app / reveal / 升级；后端 App Manager 执行", badge: "host" },
+          en: { name: "appId operation boundary", desc: "launch_app / reveal / upgrade; host App Manager executes", badge: "host" } },
+        inventory: { x: 40, y: 250, w: 230, h: 120, color: "orange", host: true,
+          zh: { name: "宿主 inventory 缓存", desc: "App Manager 共享清单 / revision；单写者 single-flight", badge: "host" },
+          en: { name: "Host inventory cache", desc: "App Manager shared inventory / revision; single-flight writer", badge: "host" } },
+        revision: { x: 560, y: 250, w: 210, h: 110, color: "green",
+          zh: { name: "InventorySnapshot 快照", desc: "不可变快照；派生分类与网格的输入", badge: "snapshot" },
+          en: { name: "InventorySnapshot", desc: "Immutable snapshot; input to classify & grid", badge: "snapshot" } },
+        grid: { x: 430, y: 430, w: 230, h: 96, color: "blue",
+          zh: { name: "虚拟网格 VirtualGridView", desc: "大列表虚拟化；只渲染可见项", badge: "frontend" },
+          en: { name: "Virtual Grid (VirtualGridView)", desc: "Virtualized list; renders only visible rows", badge: "frontend" } },
+        icon: { x: 820, y: 250, w: 220, h: 110, color: "green",
+          zh: { name: "可见项图标懒加载", desc: "get_app_icon_base64 按可见项按需提取", badge: "asset" },
+          en: { name: "Lazy visible-item icons", desc: "get_app_icon_base64 fetched on demand per visible item", badge: "asset" } },
+      }
+
+      const EDGES = {
+        e1: { from: "inventory", to: "revision", fromSide: "right", toSide: "left", color: "green",
+          zh: { label: "只读缓存 → 快照", flow: "首载从宿主缓存恢复 InventorySnapshot，不触发自动全扫。", tech: "get_cached_app_inventory 返回已有 revision；快照为不可变输入。", risk: "快照可能 stale；标记刷新状态但不自动重扫。", plan: "按 inventory revision 重新分类已在设计约束内。" },
+          en: { label: "cache → snapshot", flow: "First load restores InventorySnapshot from host cache, no automatic full scan.", tech: "get_cached_app_inventory returns the existing revision; snapshot is immutable input.", risk: "Snapshot may be stale; show refresh state but don't auto-rescan.", plan: "Re-classify by inventory revision is an enforced design constraint." } },
+        e2: { from: "controller", to: "inventory", fromSide: "left", toSide: "top", color: "blue",
+          zh: { label: "用户刷新 → 宿主扫描", flow: "手动刷新触发宿主 single-flight 扫描，旧结果丢弃。", tech: "scan_installed_apps + cancel_app_inventory_scan；按 revision 去重。", risk: "取消需回收子进程；刷新中保留旧快照可见。", plan: "无新规划，单 flight 已落实。" },
+          en: { label: "refresh → host scan", flow: "Manual refresh triggers a host single-flight scan; old results are dropped.", tech: "scan_installed_apps + cancel_app_inventory_scan; dedupe by revision.", risk: "Cancel must reclaim child process; keep old snapshot visible during refresh.", plan: "No new plan; single-flight already enforced." } },
+        e3: { from: "revision", to: "controller", fromSide: "top", toSide: "bottom", color: "green",
+          zh: { label: "快照 → 读取", flow: "插件消费快照派生视图，不得直写 App Manager store。", tech: "数据源约束：只消费 InventorySnapshot，复用扫描流程。", risk: "不可复制扫描或写宿主 store（设计红线）。", plan: "分类执行器与规则分离带版本，持续生效。" },
+          en: { label: "snapshot → read", flow: "Plugin consumes snapshot to derive views; must not write App Manager store.", tech: "Data-source constraint: consume InventorySnapshot only, reuse scan flow.", risk: "Must not copy scan or write host store (design red line).", plan: "Classifier/rule separation with versioning stays in effect." } },
+        e4: { from: "classify", to: "controller", fromSide: "right", toSide: "left", color: "purple",
+          zh: { label: "分类 / 覆盖 → 视图", flow: "场景分类 + 用户覆盖 + 排序驱动网格。", tech: "scenes.ts 规则 + store 中 overrides（带 schema version 持久化）。", risk: "覆盖不得修改清单事实；仅影响展示顺序。", plan: "分类规则随版本演进。" },
+          en: { label: "classify / override → view", flow: "Scenario classify + user overrides + ordering drive the grid.", tech: "scenes.ts rules + overrides in store (persisted with schema version).", risk: "Overrides must not alter inventory facts; only display order.", plan: "Classification rules evolve with versions." } },
+        e5: { from: "controller", to: "grid", fromSide: "bottom", toSide: "top", color: "blue",
+          zh: { label: "派生网格", flow: "搜索/分类/排序输出虚拟网格。", tech: "VirtualGridView；Unicode NFKC 搜索含当前语言场景文案。", risk: "大列表必须虚拟化，禁止一次性渲染全部。", plan: "无新规划。" },
+          en: { label: "derive grid", flow: "Search/classify/sort output the virtual grid.", tech: "VirtualGridView; Unicode NFKC search includes current-language scenario copy.", risk: "Large lists must be virtualized; never render all at once.", plan: "No new plan." } },
+        e6: { from: "grid", to: "icon", fromSide: "right", toSide: "left", color: "green",
+          zh: { label: "可见项 → 懒图标", flow: "仅可见项请求图标，降低开销。", tech: "get_app_icon_base64 按可见窗口按需调用。", risk: "图标缺失需稳定 fallback，不能阻塞列表。", plan: "无新规划。" },
+          en: { label: "visible → lazy icons", flow: "Only visible items request icons, reducing overhead.", tech: "get_app_icon_base64 called on demand per visible window.", risk: "Missing icon needs a stable fallback; must not block the list.", plan: "No new plan." } },
+        e7: { from: "grid", to: "launch", fromSide: "right", toSide: "bottom", color: "orange",
+          zh: { label: "点击 appId → 启动", flow: "点击可见项仅传 appId；不可启动项不可点击。", tech: "launch_app / reveal_app_in_finder；平台目标由后端 adapter。", risk: "nonlaunchable 不得进入可点击场景（设计约束）。", plan: "Windows EXE/AUMID 目标待真机 smoke。" },
+          en: { label: "click appId → launch", flow: "Clicking a visible item passes only appId; non-launchable items aren't clickable.", tech: "launch_app / reveal_app_in_finder; platform target via backend adapter.", risk: "Non-launchable must not enter the clickable scenario (design constraint).", plan: "Windows EXE/AUMID targets await real-device smoke." } },
+      }
+
+      const SCENARIOS = [
+        { id: "s1", edges: ["e1"], zh: "恢复缓存无自动全扫", en: "Restore cache, no auto scan" },
+        { id: "s2", edges: ["e2", "e3"], zh: "手动刷新", en: "Manual refresh" },
+        { id: "s3", edges: ["e1", "e3"], zh: "旧 revision 晚到", en: "Stale revision arrives late" },
+        { id: "s4", edges: ["e4", "e5"], zh: "拖拽排序 / 用户覆盖", en: "Drag reorder / override" },
+        { id: "s5", edges: ["e7"], zh: "不可启动项", en: "Non-launchable item" },
+        { id: "s6", edges: ["e5", "e6"], zh: "切语言长名称", en: "Language switch, long names" },
+      ]
+
+      let lang = "zh"
+      const COLORVAR = { blue: "var(--blue)", green: "var(--green)", orange: "var(--orange)", purple: "var(--purple)" }
+      const $ = (id) => document.getElementById(id)
+      const t = (k) => UI[lang][k]
+
+      function applyUI() {
+        $("title").textContent = t("title")
+        $("subtitle").textContent = t("subtitle")
+        $("owner").textContent = t("owner")
+        $("sceneLbl").textContent = t("sceneLbl")
+        $("lg-blue").textContent = t("lgBlue")
+        $("lg-green").textContent = t("lgGreen")
+        $("lg-purple").textContent = t("lgPurple")
+        $("lg-orange").textContent = t("lgOrange")
+        $("langBtn").textContent = lang === "zh" ? "EN" : "ZH"
+      }
+      function nodeRect(id) { const n = NODES[id]; return { x: n.x, y: n.y, w: n.w, h: n.h, cx: n.x + n.w / 2, cy: n.y + n.h / 2 } }
+      function anchor(r, side) {
+        if (side === "left") return { x: r.x, y: r.cy }
+        if (side === "right") return { x: r.x + r.w, y: r.cy }
+        if (side === "top") return { x: r.cx, y: r.y }
+        return { x: r.cx, y: r.y + r.h }
+      }
+      function edgePath(e) {
+        const a = anchor(nodeRect(e.from), e.fromSide)
+        const b = anchor(nodeRect(e.to), e.toSide)
+        const dx = (e.curve === "down" ? 1 : 0.5) * Math.abs(b.x - a.x || 60)
+        const c1 = { x: a.x + (a.x < b.x ? dx : -dx), y: a.y }
+        const c2 = { x: b.x + (a.x < b.x ? -dx : dx), y: b.y }
+        return `M ${a.x} ${a.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${b.x} ${b.y}`
+      }
+
+      function renderNodes() {
+        const stage = $("stage")
+        Object.entries(NODES).forEach(([id, n]) => {
+          const el = document.createElement("div")
+          el.className = "node" + (n.host ? " host" : "")
+          el.style.left = n.x + "px"; el.style.top = n.y + "px"; el.style.width = n.w + "px"; el.style.height = n.h + "px"
+          el.style.borderLeftColor = COLORVAR[n.color]
+          const d = n[lang]
+          el.innerHTML = `<div class="name">${d.name}</div><div class="desc">${d.desc}</div><span class="badge">${d.badge}</span>`
+          el.tabIndex = 0; el.setAttribute("role", "button"); el.setAttribute("aria-label", d.name)
+          el.dataset.node = id
+          el.addEventListener("click", () => openNode(id))
+          el.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openNode(id) } })
+          stage.insertBefore(el, $("drawer"))
+        })
+      }
+
+      let EDGE_REFS = [], EDGE_BADGES = []
+      function renderEdges() {
+        const svg = $("edges")
+        const ns = "http://www.w3.org/2000/svg"
+        Object.entries(EDGES).forEach(([id, e], i) => {
+          const d = e[lang]
+          const path = document.createElementNS(ns, "path")
+          path.setAttribute("d", edgePath(e))
+          path.setAttribute("fill", "none")
+          path.setAttribute("stroke", COLORVAR[e.color])
+          path.setAttribute("stroke-width", "2.2")
+          path.setAttribute("stroke-linecap", "round")
+          path.setAttribute("opacity", "0.85")
+          path.setAttribute("class", "edge-main")
+          path.dataset.edge = id
+          svg.appendChild(path)
+          const hit = document.createElementNS(ns, "path")
+          hit.setAttribute("class", "hit"); hit.setAttribute("d", edgePath(e))
+          hit.setAttribute("tabindex", "0"); hit.setAttribute("role", "button"); hit.setAttribute("aria-label", d.label)
+          const open = () => openEdge(id)
+          hit.addEventListener("click", open); hit.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open() } })
+          svg.appendChild(hit)
+          const a = anchor(nodeRect(e.from), e.fromSide), b = anchor(nodeRect(e.to), e.toSide)
+          const badge = document.createElement("button")
+          badge.className = "edge-badge"
+          badge.style.left = (a.x + b.x) / 2 + "px"; badge.style.top = (a.y + b.y) / 2 + "px"
+          badge.textContent = String(i + 1); badge.setAttribute("aria-label", d.label)
+          badge.addEventListener("click", open)
+          $("stage").insertBefore(badge, $("drawer"))
+          EDGE_BADGES.push(badge)
+        })
+      }
+
+      function renderScenarios() {
+        const box = $("scenarios")
+        SCENARIOS.forEach((s) => {
+          const b = document.createElement("button")
+          b.className = "btn"; b.textContent = s[lang]; b.setAttribute("aria-pressed", "false")
+          b.addEventListener("click", () => toggleScenario(s, b))
+          box.appendChild(b)
+        })
+      }
+      let activeScenario = null
+      function box_allScenarioBtns() { return Array.from($("scenarios").querySelectorAll("button")) }
+      function toggleScenario(s, btn) {
+        if (activeScenario === s) { clearHighlight(); btn.setAttribute("aria-pressed", "false"); activeScenario = null; return }
+        activeScenario = s
+        box_allScenarioBtns().forEach((x) => x.setAttribute("aria-pressed", "false"))
+        btn.setAttribute("aria-pressed", "true")
+        const relatedNodes = new Set()
+        s.edges.forEach((id) => { relatedNodes.add(EDGES[id].from); relatedNodes.add(EDGES[id].to) })
+        Object.keys(NODES).forEach((id) => {
+          const el = document.querySelector(`.node[data-node="${id}"]`)
+          if (el) el.classList.toggle("dim", !relatedNodes.has(id))
+        })
+        setEdgeOpacity(s.edges)
+      }
+      function setEdgeOpacity(edgeIds) {
+        const ids = new Set(edgeIds)
+        const entries = Object.entries(EDGES)
+        EDGE_REFS.forEach((r, i) => { r.style.opacity = ids.has(entries[i][0]) ? "1" : "0.2" })
+        EDGE_BADGES.forEach((b, i) => { b.style.opacity = ids.has(entries[i][0]) ? "1" : "0.3" })
+      }
+      function clearHighlight() {
+        activeScenario = null
+        box_allScenarioBtns().forEach((x) => x.setAttribute("aria-pressed", "false"))
+        Object.keys(NODES).forEach((id) => { const el = document.querySelector(`.node[data-node="${id}"]`); if (el) el.classList.remove("dim") })
+        EDGE_REFS.forEach((r) => (r.style.opacity = "0.85"))
+        EDGE_BADGES.forEach((b) => (b.style.opacity = "1"))
+      }
+
+      function openNode(id) {
+        const n = NODES[id]; const d = n[lang]
+        showDrawer(d.name, (n.host ? "host · " : "") + d.badge, {
+          flow: lang === "zh" ? "该节点承担职责，不是一条调用边。" : "This node carries responsibility, not a single call edge.",
+          tech: `${d.name} — ${d.desc}`,
+          risk: lang === "zh" ? "边界：Quick Launch 不新增平台分支或 Tauri 直调；平台差异留后端 adapter。" : "Boundary: Quick Launch adds no platform branch or direct Tauri call; platform differences stay in the backend adapter.",
+          plan: lang === "zh" ? "清单事实不受用户覆盖修改；overrides 仅影响展示顺序。" : "Inventory facts are unaffected by user overrides; overrides only change display order.",
+        })
+      }
+      function openEdge(id) {
+        const e = EDGES[id]; const d = e[lang]
+        showDrawer(d.label, "edge", { flow: d.flow, tech: d.tech, risk: d.risk, plan: d.plan })
+      }
+
+      let lastFocus = null, CURRENT = null, currentTab = "flow"
+      function showDrawer(title, kind, content) {
+        lastFocus = document.activeElement
+        $("drawerTitle").textContent = title; $("drawerKind").textContent = kind
+        $("drawer").classList.add("open"); CURRENT = content; renderTab()
+        $("drawer").focus()
+      }
+      function closeDrawer() { $("drawer").classList.remove("open"); if (lastFocus && lastFocus.focus) lastFocus.focus() }
+      function renderTab() {
+        const map = { flow: "流程", tech: "技术实现", risk: "限制与风险", plan: "后续规划" }
+        const enmap = { flow: "Flow", tech: "Technical", risk: "Limits & Risk", plan: "Planned" }
+        const heading = lang === "zh" ? map[currentTab] : enmap[currentTab]
+        $("drawerBody").innerHTML = `<h3>${heading}</h3><div>${CURRENT[currentTab] || ""}</div>`
+      }
+      function selectTab(key) {
+        currentTab = key
+        document.querySelectorAll(".tab").forEach((tb) => tb.setAttribute("aria-selected", String(tb.dataset.tab === key)))
+        renderTab()
+      }
+
+      function init() {
+        applyUI(); renderNodes(); renderEdges()
+        document.querySelectorAll("svg.edges path.edge-main").forEach((p) => EDGE_REFS.push(p))
+        renderScenarios()
+        $("langBtn").addEventListener("click", () => {
+          lang = lang === "zh" ? "en" : "zh"; applyUI()
+          Object.keys(NODES).forEach((id) => {
+            const el = document.querySelector(`.node[data-node="${id}"]`)
+            if (!el) return
+            const d = NODES[id][lang]
+            el.innerHTML = `<div class="name">${d.name}</div><div class="desc">${d.desc}</div><span class="badge">${d.badge}</span>`
+            el.setAttribute("aria-label", d.name)
+          })
+          document.querySelectorAll(".edge-badge").forEach((b, i) => b.setAttribute("aria-label", EDGES[Object.keys(EDGES)[i]][lang].label))
+          const btns = box_allScenarioBtns()
+          SCENARIOS.forEach((s, i) => { if (btns[i]) btns[i].textContent = s[lang] })
+          if ($("drawer").classList.contains("open") && CURRENT) renderTab()
+        })
+        $("drawerClose").addEventListener("click", closeDrawer)
+        $("drawer").addEventListener("keydown", (ev) => { if (ev.key === "Escape") { ev.stopPropagation(); closeDrawer() } })
+        document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && $("drawer").classList.contains("open")) closeDrawer() })
+        document.querySelectorAll(".tab").forEach((tb) => {
+          tb.addEventListener("click", () => selectTab(tb.dataset.tab))
+          tb.addEventListener("keydown", (ev) => {
+            if (["ArrowRight", "ArrowLeft", "Home", "End"].includes(ev.key)) {
+              ev.preventDefault()
+              const tabs = Array.from(document.querySelectorAll(".tab")); let i = tabs.indexOf(tb)
+              if (ev.key === "ArrowRight") i = (i + 1) % tabs.length
+              if (ev.key === "ArrowLeft") i = (i - 1 + tabs.length) % tabs.length
+              if (ev.key === "Home") i = 0
+              if (ev.key === "End") i = tabs.length - 1
+              tabs[i].focus(); selectTab(tabs[i].dataset.tab)
+            }
+          })
+        })
+      }
+      init()
+    </script>
+  </body>
+</html>

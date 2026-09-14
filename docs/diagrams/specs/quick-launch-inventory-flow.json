@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Quick Launch 共享清单与场景化启动 · 架构说明",
+    "locale": "zh-CN",
+    "hand_crafted": true,
+    "note": "手工维护 SVG/HTML；本 spec 仅为目录索引元数据，不作为再生成依据",
+    "fig": "FIG-14",
+    "owner": "plugin:quick-launch",
+    "audited": "2026-09-14"
+  },
+  "nodes": ["classify", "controller", "launch", "inventory", "revision", "grid", "icon"],
+  "edges": ["e1", "e2", "e3", "e4", "e5", "e6", "e7"]
+}

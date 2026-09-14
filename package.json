@@ -1,0 +1,12 @@
+{
+  "name": "kindred-plugin-market",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bench 插件市场 — 插件发布源与架构文档",
+  "scripts": {
+    "start": "node scripts/menu.mjs",
+    "diagrams": "node docs/diagrams/server.mjs",
+    "diagrams:select": "node docs/diagrams/launch.mjs"
+  }
+}
