@@ -1,0 +1,53 @@
+name: quality
+
+# 只读验证：i18n 必过链 + 七插件真实测试（宿主工具链）。
+# 宿主 checkout 固定在 HOST_BASELINE_SHA（1003f48，G01 收据），不跟随 main。
+# 本工作流绝不提交/推送/发布（发布职责归 release-please，属业务流程）。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality (node 26.8.2 / macos)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（市场）
+      - name: Checkout pinned host baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（宿主 indredK/bench）
+        with:
+          repository: indredK/bench
+          # HOST_BASELINE_SHA：Tauri 阶段 G01 收据（见任务台账 §4）。
+          ref: 1003f484e22ec81846794ca191b70796868f53d4
+          path: host
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 12.4.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            host/pnpm-lock.yaml
+      - name: Install host dependencies (frozen)
+        run: pnpm install --frozen-lockfile
+        working-directory: host
+      - name: Install market dependencies (frozen)
+        run: pnpm install --frozen-lockfile
+      - name: i18n self-containment audit (7 plugins)
+        run: pnpm run audit:ext-i18n
+      - name: i18n parity vs host baseline
+        run: pnpm run check:i18n-parity -- --bench ../host
+      - name: Extension tests (host toolchain)
+        run: pnpm run test:extensions -- --host ../host
