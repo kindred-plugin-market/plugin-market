@@ -1,7 +1,8 @@
 name: quality
 
 # 只读验证：i18n 必过链 + 七插件真实测试（宿主工具链）。
-# 宿主 checkout 固定在 HOST_BASELINE_SHA（1003f48，G01 收据），不跟随 main。
+# 宿主 checkout 固定在 `.github/host-baseline.txt`（HOST_BASELINE_SHA），不跟随 main；
+# 构建/发布读同一个文件（P09），三者输入一致才谈得上「测试结论可传递到产物」。
 # 本工作流绝不提交/推送/发布（发布职责归 release-please，属业务流程）。
 on:
   push:
@@ -16,6 +17,10 @@ concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # 与 package.json 的 packageManager 一致；三个工作流共用同一个值（tests/build-inputs.test.mjs 锁定）。
+  PNPM_VERSION: 12.4.1
+
 jobs:
   quality:
     name: quality (node 26.8.2 / macos)
@@ -23,16 +28,18 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（市场）
+      - name: Resolve host baseline
+        id: host
+        run: echo "sha=$(cat .github/host-baseline.txt)" >> "$GITHUB_OUTPUT"
       - name: Checkout pinned host baseline
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（宿主 indredK/bench）
         with:
           repository: indredK/bench
-          # HOST_BASELINE_SHA：Tauri 阶段 G01 收据（见任务台账 §4）。
-          ref: 1003f484e22ec81846794ca191b70796868f53d4
+          ref: ${{ steps.host.outputs.sha }}
           path: host
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
-          version: 12.4.1
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version

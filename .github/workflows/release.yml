@@ -4,7 +4,11 @@ name: Release
 # 构建该插件 → 注入 files 清单 → 打 zip → 发布 GitHub Release。
 # zip = 部署形态（manifest.json + index.html + bundle/），插件市场
 # registry.json 的 downloadUrl 指向本 Release 资产。
-# 注意：push 到 main 分支的常规构建在 build.yml（artifact 形态），本工作流不监听分支。
+# 注意：push 到 main 分支的常规构建在 build.yml；本工作流不监听分支。
+#
+# P09：与 build.yml/quality.yml 共用同一组输入（`.github/host-baseline.txt` 宿主 SHA、
+# `.node-version` Node 26.8.2、PNPM_VERSION 12.4.1、Action 完整 SHA），并发布
+# `provenance.json` 来源收据。
 on:
   push:
     tags:
@@ -17,11 +21,36 @@ on:
         default: "hardware"
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: plugin-publish
+  cancel-in-progress: false
+
+env:
+  PNPM_VERSION: 12.4.1
 
 jobs:
-  build:
+  baseline:
+    name: resolve host baseline
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      sha: ${{ steps.host.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read pinned host sha
+        id: host
+        run: echo "sha=$(cat .github/host-baseline.txt)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
     steps:
       - name: Resolve plugin id
         run: |
@@ -32,30 +61,36 @@ jobs:
           fi
 
       - name: Checkout plugin-market repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: market
 
       - name: Checkout Bench host workspace
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: indredK/bench
-          ref: main
+          ref: ${{ needs.baseline.outputs.sha }}
           token: ${{ secrets.BENCH_REPO_TOKEN }}
           path: bench
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
-          version: 11.8.0
+          version: ${{ env.PNPM_VERSION }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version-file: market/.node-version
           cache: pnpm
-          cache-dependency-path: bench/pnpm-lock.yaml
+          cache-dependency-path: |
+            market/pnpm-lock.yaml
+            bench/pnpm-lock.yaml
 
       - name: Install host dependencies
         working-directory: bench
+        run: pnpm install --frozen-lockfile
+
+      - name: Install market dependencies
+        working-directory: market
         run: pnpm install --frozen-lockfile
 
       - name: Verify plugin exists
@@ -74,13 +109,24 @@ jobs:
         working-directory: bench
         run: node scripts/plugins/pack-extension.mjs "$PLUGIN_ID" --out "$GITHUB_WORKSPACE/dist"
 
+      - name: Write provenance receipt
+        env:
+          HOST_SHA: ${{ needs.baseline.outputs.sha }}
+          MARKET_SHA: ${{ github.sha }}
+        run: |
+          node market/scripts/write-provenance.mjs \
+            --dist "$GITHUB_WORKSPACE/dist" \
+            --market-sha "$MARKET_SHA" \
+            --host-sha "$HOST_SHA" \
+            --host-dir bench
+
       # release-please（release-please.yml）已创建带 changelog body 的 Release；
       # 此处仅追加 zip 资产。不开启 generate_release_notes，避免覆盖其 body。
       #
       # ⚠️ 不用 softprops/action-gh-release：Release 已存在时它走 PATCH
       # update-a-release，本仓库 GITHUB_TOKEN 无该权限（403 Resource not
       # accessible by integration）。改用 gh release upload（只传资产）。
-      - name: Upload zip asset to GitHub Release
+      - name: Upload assets to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
@@ -91,16 +137,18 @@ jobs:
           repo="${GITHUB_REPOSITORY}"
           gh release view "$GITHUB_REF_NAME" --repo "$repo" >/dev/null 2>&1 \
             || gh release create "$GITHUB_REF_NAME" --repo "$repo" --title "${PLUGIN_ID} ${GITHUB_REF_NAME}" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" dist/*.zip --repo "$repo" --clobber
+          gh release upload "$GITHUB_REF_NAME" dist/*.zip dist/provenance.json --repo "$repo" --clobber
 
       # workflow_dispatch（诊断用）在分支 ref 上运行，无法创建 Release，
-      # 以 artifact 形式保留 zip 以便下载验证。
+      # 以 artifact 形式保留 zip 与来源收据以便下载验证。
       - name: Upload build artifact
         if: "!startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bench-ext-${{ env.PLUGIN_ID }}-zip
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/provenance.json
           retention-days: 14
           if-no-files-found: error
 

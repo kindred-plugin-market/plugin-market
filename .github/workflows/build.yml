@@ -3,43 +3,81 @@ name: Build (main)
 # push 到 main → 借 Bench 宿主工作区构建 extensions/ 下全部插件 → zip 发布到
 # 滚动 Release「build-latest」（永久留存，每次自动覆盖旧资产，不抢 Latest 徽章）。
 # 正式发布仍走 release-please.yml（conventional commits → release PR → tag）→ release.yml。
+#
+# P09：构建输入必须与质量输入一致 —— 宿主 SHA 读 `.github/host-baseline.txt`（唯一来源），
+# Node 走 `.node-version`（26.8.2），pnpm 走 PNPM_VERSION（12.4.1），所有第三方 Action
+# 固定到完整 commit SHA；产物带 `dist/provenance.json` 来源收据（market/host SHA、Node、
+# pnpm、宿主 Rust channel、zip sha256/size）。
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  # 与写回/发布共用同一组：滚动构建不并发，避免互相覆盖资产。
+  group: plugin-publish
+  cancel-in-progress: false
+
+env:
+  PNPM_VERSION: 12.4.1
 
 jobs:
-  build:
+  # 唯一的宿主 SHA 来源：market 侧文件，构建与测试读同一个值。
+  baseline:
+    name: resolve host baseline
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      sha: ${{ steps.host.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read pinned host sha
+        id: host
+        run: echo "sha=$(cat .github/host-baseline.txt)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
     steps:
       - name: Checkout plugin-market repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: market
 
       - name: Checkout Bench host workspace
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: indredK/bench
-          ref: main
+          ref: ${{ needs.baseline.outputs.sha }}
           token: ${{ secrets.BENCH_REPO_TOKEN }}
           path: bench
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
-          version: 11.8.0
+          version: ${{ env.PNPM_VERSION }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version-file: market/.node-version
           cache: pnpm
-          cache-dependency-path: bench/pnpm-lock.yaml
+          cache-dependency-path: |
+            market/pnpm-lock.yaml
+            bench/pnpm-lock.yaml
 
       - name: Install host dependencies
         working-directory: bench
+        run: pnpm install --frozen-lockfile
+
+      - name: Install market dependencies
+        working-directory: market
         run: pnpm install --frozen-lockfile
 
       # 提示性校验：extensions/ 与 release-please 配置是否一致。
@@ -86,8 +124,20 @@ jobs:
             node scripts/plugins/pack-extension.mjs "$p" --out "$GITHUB_WORKSPACE/dist"
           done < "$GITHUB_WORKSPACE/plugins.txt"
 
+      # P09 来源收据：把「被验证过的输入」写进产物，随 zip 一起发布。
+      - name: Write provenance receipt
+        env:
+          HOST_SHA: ${{ needs.baseline.outputs.sha }}
+          MARKET_SHA: ${{ github.sha }}
+        run: |
+          node market/scripts/write-provenance.mjs \
+            --dist "$GITHUB_WORKSPACE/dist" \
+            --market-sha "$MARKET_SHA" \
+            --host-sha "$HOST_SHA" \
+            --host-dir bench
+
       - name: Publish to rolling release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: build-latest
           name: Latest build (main)
@@ -95,8 +145,12 @@ jobs:
             滚动构建产物：main 分支每次 push 自动重建并覆盖（永久留存，非正式版本）。
 
             - 构建commit: ${{ github.sha }}
+            - 宿主基线: ${{ needs.baseline.outputs.sha }}
             - 构建记录: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - 输入清单: provenance.json（market/host SHA、Node、pnpm、zip sha256）
             - 正式版本请下载各 `<pluginId>-v<version>` Release 的资产
           prerelease: true
           make_latest: false
-          files: dist/*.zip
+          files: |
+            dist/*.zip
+            dist/provenance.json

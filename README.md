@@ -79,6 +79,8 @@ upsert 语义：只动目标插件的目标版本，保留其他插件、历史�
 | ---- | ---- | ---- |
 | Node（本机/开发/主 CI） | `26.8.2` | [.node-version](.node-version)；最低支持 `>=24.15.0`（engines） |
 | pnpm | `12.4.1` | `packageManager`；`allowBuilds.lefthook: false` 必须保留 |
+| 宿主基线 | [.github/host-baseline.txt](.github/host-baseline.txt) | 构建/测试共用的唯一 HOST_BASELINE_SHA；改它等于换宿主输入 |
+| 来源收据 | `dist/provenance.json` | 发布产物附带：market SHA、host SHA、Node、pnpm、宿主 Rust channel、各 zip sha256/size |
 
 质量门禁由 [bench-quality-cli](https://github.com/kindred-plugin-market/bench-quality-cli)（`plugin-market` profile）生成：
 `partial-staging`（拒绝部分暂存，先于 lefthook）→ `whitespace` → `markdown-links` → `commitlint`；
@@ -88,13 +90,15 @@ upsert 语义：只动目标插件的目标版本，保留其他插件、历史�
 
 ```bash
 pnpm run audit:ext-i18n                                  # 7 插件 zh 自包含审计
-pnpm run check:i18n-parity -- --bench ../host            # 双语 parity（对照固定宿主基线）
-pnpm run test:extensions -- --host ../host               # 七插件真实测试（宿主工具链）
+ln -sfn ../../tauri-app host                             # 本地复现 CI 布局（host/ 已被 git 忽略）
+pnpm run check:i18n-parity -- --bench host               # 双语 parity（对照固定宿主基线）
+pnpm run test:extensions -- --host host                  # 七插件真实测试（宿主工具链）
 ```
 
-- 宿主输入固定为 **HOST_BASELINE_SHA=1003f48**（G01 收据，见任务台账 §4），CI 在
-  quality.yml 中以该 SHA checkout `indredK/bench`；本地开发可直接用工作区相对布局
-  （`../tauri-app`），不必传参。
+- 宿主输入固定为 **`.github/host-baseline.txt`** 里的 HOST_BASELINE_SHA，三个工作流
+  （quality / build / release）读同一个文件，构建与测试的输入因此完全一致；显式传
+  `--bench/--host` 时路径必须落在工作区内（`host`，不是 `../host`：checkout 只会落在
+  `$GITHUB_WORKSPACE`，`../…` 永远不存在）。
 - `test:extensions` 报告 `expected/discovered/tested/skipped/failed`，缺输入/零发现/
   `--id` 未命中/零实测一律非零退出；测试以**宿主的 vitest + 宿主 node_modules** 执行
   （root=host），保证插件与宿主共享同一份 React（避免双实例导致 hooks 失效）。
