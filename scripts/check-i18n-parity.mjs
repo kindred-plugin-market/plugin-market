@@ -43,6 +43,27 @@ const root = resolveBenchRoot()
 const marketDefault = path.resolve(root, "..", "kindred-plugin-market", "plugin-market")
 const marketDir = path.resolve(valueOf("--market") ?? marketDefault)
 
+/* ── 宿主根校验（P08 / 审计 R04） ──────────────────────────────────────
+ * 此前不校验：显式 `--bench` 指向不存在或错的目录时不会报错，只会少解析宿主模块/
+ * 引用（本机实测 refs 92→91）后照样 exit 0 —— 静态工作流守卫只能挡住已知 YAML 形态，
+ * 运行时输入必须自己 fail-closed。 */
+function assertHostRoot(candidate) {
+  const problems = []
+  if (!existsSync(candidate)) problems.push(`${candidate} 不存在`)
+  else {
+    if (!existsSync(path.join(candidate, "package.json"))) problems.push("缺少 package.json")
+    if (!existsSync(path.join(candidate, "src"))) problems.push("缺少 src/")
+    else if (!existsSync(path.join(candidate, "src", "i18n"))) problems.push("缺少 src/i18n/")
+  }
+  if (problems.length === 0) return
+  console.error(`BENCH_HOST_MISSING: ${candidate} 不是 Bench 宿主 — ${problems.join("；")}`)
+  console.error(
+    "hint: --bench 必须指向宿主检出（含 package.json、src/ 与 src/i18n/）；CI 里由 actions/checkout path: host 建立。",
+  )
+  process.exit(1)
+}
+assertHostRoot(root)
+
 /* ── 严格 JSON 解析：解析前检测重复键（JSON.parse 会静默去重，掩盖重复键） ── */
 function parseStrict(text, label) {
   let i = 0
@@ -180,12 +201,25 @@ function collectKeys(files) {
 
 function resolveHostFiles(specifiers) {
   const files = []
+  const unresolved = []
   for (const spec of specifiers) {
     const base = path.join(root, "src", spec.slice(2))
-    if (existsSync(base) && statSync(base).isDirectory()) files.push(...walk(base))
-    else for (const ext of [".ts", ".tsx"]) if (existsSync(base + ext)) files.push(base + ext)
+    if (existsSync(base) && statSync(base).isDirectory()) {
+      files.push(...walk(base))
+      continue
+    }
+    let found = false
+    for (const ext of [".ts", ".tsx"]) {
+      if (existsSync(base + ext)) {
+        files.push(base + ext)
+        found = true
+      }
+    }
+    // 解析不到的 `@/…` 说明宿主根不对（或插件引用了不存在的宿主模块）——旧实现
+    // 静默丢弃，于是坏宿主根只表现为「引用变少」。
+    if (!found) unresolved.push(spec)
   }
-  return files
+  return { files, unresolved }
 }
 
 /* ── 发现插件：以 manifest.json 为准（不依赖 zh.json 是否存在） ── */
@@ -277,7 +311,14 @@ async function main() {
       const src = readFileSync(f, "utf8")
       for (const m of src.matchAll(/from ["'](@\/[^"']+)["']/g)) hostSpecifiers.add(m[1])
     }
-    const hostFiles = resolveHostFiles([...hostSpecifiers])
+    const { files: hostFiles, unresolved } = resolveHostFiles([...hostSpecifiers])
+    if (unresolved.length > 0) {
+      problems.push(
+        `宿主模块无法解析（宿主根 ${root}）：${unresolved.slice(0, 5).join(", ")}${
+          unresolved.length > 5 ? ` …(+${unresolved.length - 5})` : ""
+        }`,
+      )
+    }
     const { statics, dynamics } = collectKeys([...pluginFiles, ...hostFiles])
     for (const k of statics) {
       if (!(k in zh) || !(k in en)) problems.push(`引用 key 缺失双语: ${k}`)
