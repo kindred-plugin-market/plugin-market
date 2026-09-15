@@ -40,8 +40,16 @@ jobs:
         id: host
         run: echo "sha=$(cat .github/host-baseline.txt)" >> "$GITHUB_OUTPUT"
 
-  build:
+  # P10：发布前必须先过质量门禁（同一个 run、同一个 SHA、同一份闸门定义）。
+  # 门禁红 → build job 被 skipped，未测试产物不会进入 build-latest。
+  gate:
     needs: baseline
+    uses: ./.github/workflows/quality-gate.yml
+    with:
+      host-ref: ${{ needs.baseline.outputs.sha }}
+
+  build:
+    needs: [baseline, gate]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:

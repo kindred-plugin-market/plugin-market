@@ -1,0 +1,65 @@
+name: quality gate
+
+# P10：可复用的质量门禁（唯一一份定义）。
+#
+# quality.yml（PR / main 校验）、build.yml（滚动构建）、release.yml（正式发布）都
+# 调用本文件：命令、输入、判定完全同一套。发布侧用 `needs: <本 job>` 串联，门禁红
+# 时构建/发布 job 直接 skipped —— 不再存在「先发布、后测试」的时间窗（审计 R03：
+# 同 SHA 上 Build 12:54 完成发布、quality 12:55 才出结论），也不再依赖另一条工作流
+# 的绿色（那条因果链在 D07 已被证明可以循环）。
+#
+# 输入 host-ref 由调用方的 baseline job 从 `.github/host-baseline.txt` 读出，
+# 保证被测试的宿主与构建/发布用的宿主是同一个 commit。
+on:
+  workflow_call:
+    inputs:
+      host-ref:
+        description: "固定宿主 commit（来自 .github/host-baseline.txt）"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  PNPM_VERSION: 12.4.1
+
+jobs:
+  gate:
+    name: quality gate (node 26.8.2 / macos)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（市场 = 调用方的 SHA）
+      - name: Checkout pinned host baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（宿主 indredK/bench）
+        with:
+          repository: indredK/bench
+          ref: ${{ inputs.host-ref }}
+          path: host
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            host/pnpm-lock.yaml
+      - name: Install host dependencies (frozen)
+        run: pnpm install --frozen-lockfile
+        working-directory: host
+      - name: Install market dependencies (frozen)
+        run: pnpm install --frozen-lockfile
+      - name: i18n self-containment audit (manifest set)
+        run: pnpm run audit:ext-i18n
+      # 宿主路径相对**工作区根**（= 市场仓根，host/ 由上面的 checkout 建立）；
+      # `../host` 会落到 $GITHUB_WORKSPACE/../host，永远不存在（P07）。
+      # scripts/quality/check-workflow-layout.mjs 静态锁定这个约定。
+      - name: Static guards and tests
+        run: pnpm test
+      - name: i18n parity vs host baseline
+        run: pnpm run check:i18n-parity -- --bench host
+      - name: Extension tests (host toolchain)
+        run: pnpm run test:extensions -- --host host

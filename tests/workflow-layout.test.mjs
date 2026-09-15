@@ -113,8 +113,9 @@ test("the repository workflows are internally consistent", () => {
   assert.deepEqual(checkWorkflowLayout(), [])
 })
 
-test("the quality workflow resolves the host inside the workspace", async () => {
-  const raw = await readFile(join(ROOT, ".github", "workflows", "quality.yml"), "utf8")
+test("the quality gate resolves the host inside the workspace", async () => {
+  // P10 起门禁本体在 quality-gate.yml（quality.yml 只负责解析基线并调用它）。
+  const raw = await readFile(join(ROOT, ".github", "workflows", "quality-gate.yml"), "utf8")
   // 回归断言：这正是 run 34922411421 红掉的那两行。
   assert.match(raw, /check:i18n-parity -- --bench host\b/)
   assert.match(raw, /test:extensions -- --host host\b/)

@@ -22,7 +22,10 @@ const workflowFiles = async () =>
 
 // 只有与宿主打交道的工作流才有宿主 SHA / Node / pnpm 输入；
 // release-please.yml 只管版本 PR 与打 tag，不 checkout 宿主，也不装依赖。
-const HOST_WORKFLOWS = ["quality.yml", "build.yml", "release.yml"]
+// 门禁本体（quality-gate.yml）由 P10 抽出，它是真正 checkout 宿主并装依赖的地方。
+const HOST_WORKFLOWS = ["quality-gate.yml", "build.yml", "release.yml"]
+// 从 `.github/host-baseline.txt` 解析宿主 SHA 的三个入口（各自有 baseline job）。
+const BASELINE_RESOLVERS = ["quality.yml", "build.yml", "release.yml"]
 
 const matchAll = (raw, pattern) => [...raw.matchAll(pattern)]
 
@@ -31,23 +34,24 @@ describe("宿主基线：唯一来源", () => {
     assert.match((await read(".github/host-baseline.txt")).trim(), /^[0-9a-f]{40}$/)
   })
 
-  it("每个与宿主相关的工作流都从基线文件解析宿主 SHA", async () => {
-    for (const file of HOST_WORKFLOWS) {
+  it("三个入口都从基线文件解析宿主 SHA", async () => {
+    for (const file of BASELINE_RESOLVERS) {
       const raw = await read(`.github/workflows/${file}`)
       assert.match(raw, /cat \.github\/host-baseline\.txt/, `${file} 必须从唯一来源读宿主 SHA`)
     }
   })
 
   it("宿主 checkout 的 ref 只能是基线解析结果，不能硬编码", async () => {
+    const expected = {
+      "quality-gate.yml": /^\$\{\{\s*inputs\.host-ref\s*\}\}$/,
+      "build.yml": /^\$\{\{\s*needs\.baseline\.outputs\.sha\s*\}\}$/,
+      "release.yml": /^\$\{\{\s*needs\.baseline\.outputs\.sha\s*\}\}$/,
+    }
     for (const file of HOST_WORKFLOWS) {
       const raw = await read(`.github/workflows/${file}`)
       const checkout = raw.match(/repository: indredK\/bench\n\s+ref: (.+?)\s*$/m)
       assert.ok(checkout, `${file} 必须 checkout 固定的宿主仓库`)
-      assert.match(
-        checkout[1],
-        /^\$\{\{\s*(steps\.host\.outputs\.sha|needs\.baseline\.outputs\.sha)\s*\}\}$/,
-        `${file}: 宿主 ref 必须来自基线解析结果，实际 ${checkout[1]}`,
-      )
+      assert.match(checkout[1], expected[file], `${file}: 宿主 ref 必须来自基线，实际 ${checkout[1]}`)
       // 除宿主 checkout 外，工作流不得出现任何硬编码的 ref。
       for (const match of matchAll(raw, /^\s*ref:\s*(.+?)\s*$/gm)) {
         assert.match(match[1], /^\$\{\{/, `${file}: ref 不得硬编码（${match[1]}）`)
@@ -67,7 +71,7 @@ describe("工具链：Node 与 pnpm", () => {
   it("每个宿主工作流用 .node-version 且不硬编码 node-version", async () => {
     for (const file of HOST_WORKFLOWS) {
       const raw = await read(`.github/workflows/${file}`)
-      const expected = file === "quality.yml" ? ".node-version" : "market/.node-version"
+      const expected = file === "quality-gate.yml" ? ".node-version" : "market/.node-version"
       const declared = matchAll(raw, /node-version-file:\s*(\S+)/g).map((match) => match[1])
       assert.ok(declared.length > 0, `${file} 必须用 node-version-file`)
       for (const value of declared) assert.equal(value, expected, `${file}: ${value}`)

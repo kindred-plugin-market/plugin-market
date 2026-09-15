@@ -107,5 +107,11 @@ pnpm run test:extensions -- --host host                  # 七插件真实测试
 
 | 工作流 | 权限 | 内容 |
 | ------ | ---- | ---- |
-| `quality.yml` | `contents: read` | i18n 链 + 七插件测试（宿主基线固定），只读、无写回 |
-| `build.yml` / `release.yml` | 业务写权限 | 插件构建与 release 资产（既有流程） |
+| `quality-gate.yml` | `contents: read` | **门禁本体**：i18n 链 + 七插件测试 + parity（宿主按基线固定）。只能被调用，不自行触发，故无法绕过 |
+| `quality.yml` | `contents: read` | PR / main 推送 / 手动：解析宿主基线 → 调用门禁 |
+| `build.yml` | 顶层只读，`build` job `contents: write` | **门禁绿之后**才构建滚动 Release（`build-latest`）并附 `provenance.json` |
+| `release.yml` | 顶层只读，`build` job `contents: write` | **门禁绿之后**才构建 tag 版本 → `gh release upload` + 写回 `registry.json` |
+| `release-please.yml` | 内容/issue/PR/actions 写 | 版本 PR 与打 tag，不构建插件 |
+
+发布 job 一律 `needs: gate`：门禁红/取消/跳过时构建与发布整体 skipped（`tests/publish-gate.test.mjs`
+用语义模型与负向 fixture 锁定这条关系）。

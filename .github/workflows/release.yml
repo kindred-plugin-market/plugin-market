@@ -45,8 +45,15 @@ jobs:
         id: host
         run: echo "sha=$(cat .github/host-baseline.txt)" >> "$GITHUB_OUTPUT"
 
-  build:
+  # P10：正式发布同样先过门禁（tag ref 上跑，被验证的就是这个 tag 指向的 SHA）。
+  gate:
     needs: baseline
+    uses: ./.github/workflows/quality-gate.yml
+    with:
+      host-ref: ${{ needs.baseline.outputs.sha }}
+
+  build:
+    needs: [baseline, gate]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
