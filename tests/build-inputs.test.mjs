@@ -1,6 +1,6 @@
 // P09：构建/发布的输入必须与质量门禁完全一致，并且可复现。
 //
-// 审计 R07 的形态：quality 固定宿主 1003f48 / Node 26.8.2 / pnpm 12.4.1 / Action SHA，
+// 审计 R07 的形态：quality 固定宿主 1003f48 / Node 26.8.2 / pnpm 12.4.2 / Action SHA，
 // build.yml 与 release.yml 却 checkout 宿主 main、用 Node 24 与 pnpm 11.8.0 及浮动
 // Action —— 「测试通过的输入」不是「最终构建输入」，测试结论无法传递到产物。
 //
@@ -61,11 +61,11 @@ describe("宿主基线：唯一来源", () => {
 })
 
 describe("工具链：Node 与 pnpm", () => {
-  it(".node-version 固定 26.8.2，package.json 声明最低 24.15.0 与 pnpm 12.4.1", async () => {
+  it(".node-version 固定 26.8.2，package.json 声明最低 24.15.0 与 pnpm 12.4.2", async () => {
     assert.equal((await read(".node-version")).trim(), "26.8.2")
     const pkg = JSON.parse(await read("package.json"))
     assert.equal(pkg.engines.node, ">=24.15.0")
-    assert.equal(pkg.packageManager, "pnpm@12.4.1")
+    assert.equal(pkg.packageManager, "pnpm@12.4.2")
   })
 
   it("每个宿主工作流用 .node-version 且不硬编码 node-version", async () => {

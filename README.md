@@ -78,7 +78,7 @@ upsert 语义：只动目标插件的目标版本，保留其他插件、历史�
 | 工具 | 版本 | 说明 |
 | ---- | ---- | ---- |
 | Node（本机/开发/主 CI） | `26.8.2` | [.node-version](.node-version)；最低支持 `>=24.15.0`（engines） |
-| pnpm | `12.4.1` | `packageManager`；`allowBuilds.lefthook: false` 必须保留 |
+| pnpm | `12.4.2` | `packageManager`；`allowBuilds.lefthook: false` 必须保留 |
 | 宿主基线 | [.github/host-baseline.txt](.github/host-baseline.txt) | 构建/测试共用的唯一 HOST_BASELINE_SHA；改它等于换宿主输入 |
 | 来源收据 | `dist/provenance.json` | 发布产物附带：market SHA、host SHA、Node、pnpm、宿主 Rust channel、各 zip sha256/size |
 

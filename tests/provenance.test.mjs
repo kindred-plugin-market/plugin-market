@@ -44,7 +44,7 @@ function runScript(args) {
   return spawnSync(process.execPath, [SCRIPT, ...args], {
     cwd: ROOT,
     encoding: "utf8",
-    env: { ...process.env, PNPM_VERSION: "12.4.1" },
+    env: { ...process.env, PNPM_VERSION: "12.4.2" },
   })
 }
 
@@ -86,7 +86,7 @@ describe("收据文档", () => {
     marketSha: MARKET_SHA,
     hostSha: "b".repeat(40),
     nodeVersion: "v26.8.2",
-    pnpmVersion: "12.4.1",
+    pnpmVersion: "12.4.2",
     artifacts: [{ file: "a.zip", sha256: "c".repeat(64), size: 1 }],
     generatedAt: "2026-09-15T00:00:00Z",
   }
@@ -96,7 +96,7 @@ describe("收据文档", () => {
     assert.equal(doc.schemaVersion, 1)
     assert.equal(doc.market.sha, MARKET_SHA)
     assert.equal(doc.host.sha, base.hostSha)
-    assert.equal(doc.toolchain.pnpm, "12.4.1")
+    assert.equal(doc.toolchain.pnpm, "12.4.2")
     assert.equal(doc.host.rust, undefined)
     assert.equal(buildProvenance({ ...base, rust: "1.98.1" }).host.rust, "1.98.1")
   })
@@ -121,7 +121,7 @@ describe("命令行行为", () => {
     const doc = JSON.parse(readFileSync(out1, "utf8"))
     assert.equal(doc.market.sha, MARKET_SHA)
     assert.equal(doc.host.sha, readHostBaseline(ROOT))
-    assert.equal(doc.toolchain.pnpm, "12.4.1")
+    assert.equal(doc.toolchain.pnpm, "12.4.2")
     assert.deepEqual(doc.artifacts.map((entry) => entry.file), ["bench-ext-demo-v1.0.0.zip"])
   })
 

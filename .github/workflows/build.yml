@@ -5,7 +5,7 @@ name: Build (main)
 # 正式发布仍走 release-please.yml（conventional commits → release PR → tag）→ release.yml。
 #
 # P09：构建输入必须与质量输入一致 —— 宿主 SHA 读 `.github/host-baseline.txt`（唯一来源），
-# Node 走 `.node-version`（26.8.2），pnpm 走 PNPM_VERSION（12.4.1），所有第三方 Action
+# Node 走 `.node-version`（26.8.2），pnpm 走 PNPM_VERSION（12.4.2），所有第三方 Action
 # 固定到完整 commit SHA；产物带 `dist/provenance.json` 来源收据（market/host SHA、Node、
 # pnpm、宿主 Rust channel、zip sha256/size）。
 on:
@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  PNPM_VERSION: 12.4.1
+  PNPM_VERSION: 12.4.2
 
 jobs:
   # 唯一的宿主 SHA 来源：market 侧文件，构建与测试读同一个值。

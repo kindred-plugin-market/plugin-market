@@ -7,7 +7,7 @@ name: Release
 # 注意：push 到 main 分支的常规构建在 build.yml；本工作流不监听分支。
 #
 # P09：与 build.yml/quality.yml 共用同一组输入（`.github/host-baseline.txt` 宿主 SHA、
-# `.node-version` Node 26.8.2、PNPM_VERSION 12.4.1、Action 完整 SHA），并发布
+# `.node-version` Node 26.8.2、PNPM_VERSION 12.4.2、Action 完整 SHA），并发布
 # `provenance.json` 来源收据。
 on:
   push:
@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  PNPM_VERSION: 12.4.1
+  PNPM_VERSION: 12.4.2
 
 jobs:
   baseline:
