@@ -7,10 +7,20 @@
   "scripts": {
     "start": "node scripts/menu.mjs",
     "diagrams": "node docs/diagrams/server.mjs",
-    "diagrams:select": "node docs/diagrams/launch.mjs"
+    "diagrams:select": "node docs/diagrams/launch.mjs",
+    "hooks:install": "node scripts/quality/install-hooks.mjs",
+    "check:precommit": "node node_modules/lefthook/bin/index.js run pre-commit",
+    "check:md-links": "node scripts/quality/check-markdown-links.mjs --all",
+    "prepare": "node scripts/quality/install-hooks.mjs"
   },
   "engines": {
     "node": ">=24.15.0"
   },
-  "packageManager": "pnpm@12.4.1"
+  "packageManager": "pnpm@12.4.1",
+  "devDependencies": {
+    "lefthook": "^2.1.14",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "markdown-link-check": "^3"
+  }
 }
