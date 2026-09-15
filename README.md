@@ -72,3 +72,36 @@ upsert 语义：只动目标插件的目标版本，保留其他插件、历史�
 
 流水线拉取 Bench 私有宿主工作区需要 `BENCH_REPO_TOKEN` secret（有 Bench 仓库 read
 权限的 PAT）。
+
+## 工程化基线与质量门禁
+
+| 工具 | 版本 | 说明 |
+| ---- | ---- | ---- |
+| Node（本机/开发/主 CI） | `26.8.2` | [.node-version](.node-version)；最低支持 `>=24.15.0`（engines） |
+| pnpm | `12.4.1` | `packageManager`；`allowBuilds.lefthook: false` 必须保留 |
+
+质量门禁由 [bench-quality-cli](https://github.com/kindred-plugin-market/bench-quality-cli)（`plugin-market` profile）生成：
+`partial-staging`（拒绝部分暂存，先于 lefthook）→ `whitespace` → `markdown-links` → `commitlint`；
+诊断与恢复见生成器文档（`.bench-quality.json` 记录 profile/features/文件 hash）。
+
+## 插件 i18n 与测试（CI 同款命令）
+
+```bash
+pnpm run audit:ext-i18n                                  # 7 插件 zh 自包含审计
+pnpm run check:i18n-parity -- --bench ../host            # 双语 parity（对照固定宿主基线）
+pnpm run test:extensions -- --host ../host               # 七插件真实测试（宿主工具链）
+```
+
+- 宿主输入固定为 **HOST_BASELINE_SHA=1003f48**（G01 收据，见任务台账 §4），CI 在
+  quality.yml 中以该 SHA checkout `indredK/bench`；本地开发可直接用工作区相对布局
+  （`../tauri-app`），不必传参。
+- `test:extensions` 报告 `expected/discovered/tested/skipped/failed`，缺输入/零发现/
+  `--id` 未命中/零实测一律非零退出；测试以**宿主的 vitest + 宿主 node_modules** 执行
+  （root=host），保证插件与宿主共享同一份 React（避免双实例导致 hooks 失效）。
+
+## CI 分工
+
+| 工作流 | 权限 | 内容 |
+| ------ | ---- | ---- |
+| `quality.yml` | `contents: read` | i18n 链 + 七插件测试（宿主基线固定），只读、无写回 |
+| `build.yml` / `release.yml` | 业务写权限 | 插件构建与 release 资产（既有流程） |
