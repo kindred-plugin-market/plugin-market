@@ -11,7 +11,10 @@
     "hooks:install": "node scripts/quality/install-hooks.mjs",
     "check:precommit": "node node_modules/lefthook/bin/index.js run pre-commit",
     "check:md-links": "node scripts/quality/check-markdown-links.mjs --all",
-    "prepare": "node scripts/quality/install-hooks.mjs"
+    "prepare": "node scripts/quality/install-hooks.mjs",
+    "audit:ext-i18n": "node scripts/audit-i18n.mjs",
+    "check:i18n-parity": "node scripts/check-i18n-parity.mjs --market . --bench ../tauri-app",
+    "check:i18n": "pnpm run audit:ext-i18n && pnpm run check:i18n-parity"
   },
   "engines": {
     "node": ">=24.15.0"
