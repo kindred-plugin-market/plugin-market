@@ -1,0 +1,4 @@
+# pnpm 12 在依赖构建脚本未被批准/拒绝时会直接让 install 失败（ERR_PNPM_IGNORED_BUILDS）。
+# lefthook 的 postinstall 会覆写 .husky，因此显式拒绝（与宿主 bench-quality-cli 生成策略一致）。
+allowBuilds:
+  lefthook: false
