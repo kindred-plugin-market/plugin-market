@@ -5,6 +5,10 @@ dist/
 
 # deps
 node_modules/
+
+# 本地复现 CI 布局时的宿主检出（CI 里由 actions/checkout path: host 建立；
+# scripts/quality/check-workflow-layout.mjs 锁定的就是这条相对路径）
+host/
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*

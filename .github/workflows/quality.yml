@@ -47,7 +47,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: i18n self-containment audit (7 plugins)
         run: pnpm run audit:ext-i18n
+      # 宿主路径相对**工作区根**（= 本仓库根，host/ 由上面的 checkout 建立）；
+      # `../host` 会落到 $GITHUB_WORKSPACE/../host，永远不存在（P07）。
+      # scripts/quality/check-workflow-layout.mjs 静态锁定这个约定。
+      - name: Static guards and tests
+        run: pnpm test
       - name: i18n parity vs host baseline
-        run: pnpm run check:i18n-parity -- --bench ../host
+        run: pnpm run check:i18n-parity -- --bench host
       - name: Extension tests (host toolchain)
-        run: pnpm run test:extensions -- --host ../host
+        run: pnpm run test:extensions -- --host host
