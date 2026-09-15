@@ -14,7 +14,8 @@
     "prepare": "node scripts/quality/install-hooks.mjs",
     "audit:ext-i18n": "node scripts/audit-i18n.mjs",
     "check:i18n-parity": "node scripts/check-i18n-parity.mjs --market .",
-    "check:i18n": "pnpm run audit:ext-i18n && pnpm run check:i18n-parity"
+    "check:i18n": "pnpm run audit:ext-i18n && pnpm run check:i18n-parity",
+    "test:extensions": "node scripts/test-extensions.mjs"
   },
   "engines": {
     "node": ">=24.15.0"
