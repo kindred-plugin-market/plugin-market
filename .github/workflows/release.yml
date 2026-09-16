@@ -230,10 +230,19 @@ jobs:
             exit 0
           fi
           git commit -m "chore(registry): publish ${PLUGIN_ID} v${version}"
+          # 幂等：同 tag 重跑时远程可能残留同名 bot 分支（上次 run 的 PR 已删
+          # 或未合并）——先删再推，保证分支内容 = 本次快照。
+          git push origin --delete "$branch" 2>/dev/null || true
           git push origin "$branch"
-          gh pr create \
-            --repo "$GITHUB_REPOSITORY" \
-            --head "$branch" \
-            --base main \
-            --title "chore(registry): publish ${PLUGIN_ID} v${version}" \
-            --body "自动 registry 写回（release.yml @ ${GITHUB_SHA}）。合并前必须通过 quality gate（P11：写回也走 PR）。"
+          # 已存在同名 PR 时复用（重跑场景），否则新建。
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing_pr" ]; then
+            echo "registry PR 已存在: #$existing_pr（复用）"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$branch" \
+              --base main \
+              --title "chore(registry): publish ${PLUGIN_ID} v${version}" \
+              --body "自动 registry 写回（release.yml @ ${GITHUB_SHA}）。合并前必须通过 quality gate（P11：写回也走 PR）。"
+          fi
