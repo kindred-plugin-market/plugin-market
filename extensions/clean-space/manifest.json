@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "clean-space",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "display": {
     "zh": "存储空间",
     "en": "Clean Space"

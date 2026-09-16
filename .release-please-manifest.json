@@ -1,9 +1,9 @@
 {
-  "extensions/app-manager": "1.0.2",
-  "extensions/clean-space": "1.0.1",
-  "extensions/hardware": "1.0.1",
-  "extensions/photo-triage": "0.1.1",
-  "extensions/quick-launch": "1.0.3",
-  "extensions/terminology": "1.0.1",
-  "extensions/token-calculator": "1.1.2"
+  "extensions/app-manager": "1.0.3",
+  "extensions/clean-space": "1.0.2",
+  "extensions/hardware": "1.0.2",
+  "extensions/photo-triage": "0.1.2",
+  "extensions/quick-launch": "1.0.4",
+  "extensions/terminology": "1.0.2",
+  "extensions/token-calculator": "1.1.3"
 }
