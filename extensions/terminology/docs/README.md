@@ -12,4 +12,4 @@
 | -------------------------- | ---------------------------------- |
 | [roadmap.md](./roadmap.md) | 实施路线（未完成项已归入 planned） |
 
-全局顺序：[2.0 最终路线图](../../../../../tauri-app/docs/roadmap/ROADMAP.md)
+全局顺序：[2.0 最终路线图](https://github.com/indredK/bench/blob/HEAD/docs/roadmap/ROADMAP.md)

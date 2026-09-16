@@ -26,9 +26,15 @@ env:
 
 jobs:
   gate:
-    name: quality gate (node 26.8.2 / macos)
+    name: quality gate (node ${{ matrix.node }} / macos)
     runs-on: macos-latest
     timeout-minutes: 30
+    strategy:
+      # Node 26.8.2（开发/CI 主线）+ Node 24.15（engines.node 最低合同）。
+      # 审计 §6-2：24.15 兼容只跑静态测试与 i18n audit；宿主工具链 parity 与
+      # extension tests 仍由 26.8.2 承担。
+      matrix:
+        node: ["26.8.2", "24.15.0"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（市场 = 调用方的 SHA）
       - name: Checkout pinned host baseline
@@ -59,7 +65,12 @@ jobs:
       # scripts/quality/check-workflow-layout.mjs 静态锁定这个约定。
       - name: Static guards and tests
         run: pnpm test
+      - name: Markdown links are alive
+        if: matrix.node == '26.8.2'
+        run: pnpm run check:md-links
       - name: i18n parity vs host baseline
+        if: matrix.node == '26.8.2'
         run: pnpm run check:i18n-parity -- --bench host
       - name: Extension tests (host toolchain)
+        if: matrix.node == '26.8.2'
         run: pnpm run test:extensions -- --host host

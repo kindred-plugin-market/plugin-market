@@ -3,7 +3,7 @@
 > 本文件是 photo-triage 的**完备产品规格**。一切功能改动、优化、bug 修复都必须同步更新本文件。
 > 自包含、可移植：复制到任何项目或交给任何 AI，可据此完整复刻本模块功能。
 >
-> ## ⚠️ 形态变更（2026-09-08 · [D-024](../../../../../tauri-app/docs/explanation/decisions.md#d-024--extension-仓库组织与-photo-triage-试点拆法) / P2b）
+> ## ⚠️ 形态变更（2026-09-08 · [D-024](https://github.com/indredK/bench/blob/HEAD/docs/explanation/decisions.md#d-024--extension-仓库组织与-photo-triage-试点拆法) / P2b）
 >
 > photo-triage 已**从 `src/features/` 迁出为 bundled 插件**，位置 `extensions/photo-triage/`。
 > 因此本文件第 1 节中的「路由 `/photo-triage`、侧边栏静态注册」表述**已失效**：
