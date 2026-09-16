@@ -145,13 +145,42 @@ jobs:
             --host-sha "$HOST_SHA" \
             --host-dir bench
 
+      # P13：rolling release 只表达「当前 main 的一个快照」。
+      # 版本化文件名（bench-ext-<id>-v<ver>.zip）跨版本不重名，softprops 的
+      # “同名覆盖”删不掉历史版本资产，导致 build-latest 混杂多个历史版本。
+      # 发布前先清空全部旧 bench-ext-*.zip 与 provenance，再上传本次产物，
+      # 并把 provenance 固定为稳定文件名，保证资产列表 = 本次快照。
+      - name: Prune stale rolling assets (P13)
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          repo="${GITHUB_REPOSITORY}"
+          if ! gh release view build-latest --repo "$repo" >/dev/null 2>&1; then
+            echo "rolling release 不存在，跳过清理"
+            exit 0
+          fi
+          assets="$(gh release view build-latest --repo "$repo" --json assets --jq '.assets[].name')"
+          removed=0
+          while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            case "$name" in
+              bench-ext-*.zip|provenance.json|provenance-*.json)
+                gh release delete-asset build-latest "$name" --repo "$repo" --yes
+                removed=$((removed + 1))
+                ;;
+              *) echo "保留非滚动资产: $name" ;;
+            esac
+          done <<< "$assets"
+          echo "已清理 $removed 个历史滚动资产"
+
       - name: Publish to rolling release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: build-latest
           name: Latest build (main)
           body: |
-            滚动构建产物：main 分支每次 push 自动重建并覆盖（永久留存，非正式版本）。
+            滚动构建产物：main 分支每次 push 自动重建，只保留当前快照（P13）。
 
             - 构建commit: ${{ github.sha }}
             - 宿主基线: ${{ needs.baseline.outputs.sha }}
