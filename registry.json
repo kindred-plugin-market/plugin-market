@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-13T17:16:10Z",
+  "updatedAt": "2026-09-16T06:06:50Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -206,6 +206,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.0.2",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/terminology-v1.0.2/bench-ext-terminology-v1.0.2.zip",
+          "sha256": "1f6b99de80fc45b862996724048a08596d3313f65d3eef33ccdcb59708f3954a",
+          "size": 188369,
+          "publishedAt": "2026-09-16T06:06:50Z",
+          "yanked": false
+        },
         {
           "version": "1.0.1",
           "engines": {
