@@ -24,7 +24,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: plugin-publish
+  # 正式 release 按 tag 排队（不同 tag 的资产互不同名，并行安全）；
+  # 不能与滚动 build 共用全局组 —— 7 个 tag 同时 dispatch 时会互相取消。
+  group: plugin-release-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -84,19 +86,34 @@ jobs:
           plugin_id="${INPUT_PLUGIN_ID:-${GITHUB_REF_NAME%-v*}}"
 
           # tag 触发时必须严格匹配 <plugin-id>-v<semver>，防止 glob *-v* 误吞。
+          # set -u 下 BASH_REMATCH[n] 可能整组未定义（unbound variable），
+          # 所以匹配结果先落到显式局部变量。
+          tag_prefix=""
+          tag_version=""
           if [[ "${GITHUB_REF_TYPE:-branch}" == "tag" ]]; then
-            [[ "$GITHUB_REF_NAME" =~ ^([a-z0-9][a-z0-9-]*)-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] \
-              || { echo "::error::tag '$GITHUB_REF_NAME' 不匹配 <plugin-id>-v<X.Y.Z>（严格 semver）"; exit 1; }
-            [[ "${BASH_REMATCH[1]}" == "$plugin_id" ]] \
-              || { echo "::error::tag 前缀 '${BASH_REMATCH[1]}' 与解析出的插件 id '$plugin_id' 不一致"; exit 1; }
+            if [[ ! "$GITHUB_REF_NAME" =~ ^([a-z0-9][a-z0-9-]*)-v(([0-9]+)\.([0-9]+)\.([0-9]+))$ ]]; then
+              echo "::error::tag '$GITHUB_REF_NAME' 不匹配 <plugin-id>-v<X.Y.Z>（严格 semver）"
+              exit 1
+            fi
+            # set -u 下逐个引用 BASH_REMATCH[n] 会 unbound（未参与匹配的组），
+            # 先整体拷贝再使用。版本号作为整体捕获（REMATCH[2] = X.Y.Z 全串）。
+            rematch=("${BASH_REMATCH[@]}")
+            tag_prefix="${rematch[1]}"
+            tag_version="${rematch[2]}"
+            # 严格 semver：每段不允许前导零（01.2.3 非法）。
+            for seg in "${rematch[3]}" "${rematch[4]}" "${rematch[5]}"; do
+              [[ "$seg" =~ ^(0|[1-9][0-9]*)$ ]] \
+                || { echo "::error::tag '$GITHUB_REF_NAME' 版本段含前导零，非严格 semver"; exit 1; }
+            done
+            [[ "$tag_prefix" == "$plugin_id" ]] \
+              || { echo "::error::tag 前缀 '$tag_prefix' 与解析出的插件 id '$plugin_id' 不一致"; exit 1; }
           fi
 
           [[ "$plugin_id" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "::error::非法插件 id: $plugin_id"; exit 1; }
           [[ -f "market/extensions/$plugin_id/manifest.json" ]] || { echo "::error::插件不存在: $plugin_id"; exit 1; }
 
           # tag 触发时，tag 版本必须与该插件 manifest.json version 相等。
-          if [[ "${GITHUB_REF_TYPE:-branch}" == "tag" ]]; then
-            tag_version="${BASH_REMATCH[2]}"
+          if [[ -n "$tag_version" ]]; then
             manifest_version="$(node -p "JSON.parse(require('fs').readFileSync('market/extensions/$plugin_id/manifest.json','utf8')).version")"
             [[ "$tag_version" == "$manifest_version" ]] \
               || { echo "::error::tag 版本 $tag_version != manifest 版本 $manifest_version"; exit 1; }
