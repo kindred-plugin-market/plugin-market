@@ -1,8 +1,8 @@
 # photo-triage · Bench Extension（bundled）
 
-photo-triage 的插件化形态（[D-024](../../../../tauri-app/docs/explanation/decisions.md)）。宿主经
+photo-triage 的插件化形态（[D-024](https://github.com/indredK/bench/blob/HEAD/docs/explanation/decisions.md)）。宿主经
 `tauri://localhost/ext/photo-triage/…` 加载本目录产物，UI 在独立 WebView 渲染；
-15 条 `photo_triage_*` Rust 命令**留在核心**，经 [ACL 网关](../../../../tauri-app/src-tauri/src/extension_host/acl.rs)
+15 条 `photo_triage_*` Rust 命令**留在核心**，经 [ACL 网关](https://github.com/indredK/bench/blob/HEAD/src-tauri/src/extension_host/acl.rs)
 授权本插件调用（见 `manifest.json` 的 `acl.commands`）。
 
 ## 当前状态（P2 骨架）

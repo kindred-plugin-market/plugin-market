@@ -11,4 +11,4 @@
 | ------------------------ | ------------------------ |
 | [design.md](./design.md) | 共享清单、启动与性能边界 |
 
-全局顺序：[2.0 最终路线图](../../../../../tauri-app/docs/roadmap/ROADMAP.md#r02-app-manager-与-quick-launch)
+全局顺序：[2.0 最终路线图](https://github.com/indredK/bench/blob/HEAD/docs/roadmap/ROADMAP.md#r02-app-manager-与-quick-launch)
