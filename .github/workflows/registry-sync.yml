@@ -50,12 +50,18 @@ jobs:
       - name: Push one convergent registry branch
         env:
           GH_TOKEN: ${{ github.token }}
+          PLUGIN_ID: ${{ inputs.plugin_id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main --depth=1
           git checkout -B "$REGISTRY_BRANCH" origin/main
+          # 触发该工作流的发布资产必须先严格存在；全量同步只负责补齐历史版本。
+          node scripts/update-registry.mjs \
+            --plugin "$PLUGIN_ID" \
+            --version "$PLUGIN_VERSION"
           node scripts/update-registry.mjs --all --skip-missing
           git add registry.json
           if git diff --cached --quiet; then
