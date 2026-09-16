@@ -59,6 +59,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout plugin-market repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: market
+
+      - name: Checkout Bench host workspace
+        # P12: indredK/bench 是 public 仓库 —— 匿名 checkout 即可，不携带 PAT，
+        # 并显式 persist-credentials: false 防止凭据落入 checkout 后的构建脚本环境。
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: indredK/bench
+          ref: ${{ needs.baseline.outputs.sha }}
+          path: bench
+          persist-credentials: false
+
       - name: Resolve and validate plugin id (P12)
         # 不可信上下文（workflow_dispatch inputs / tag 名）只经 env 进入 shell，
         # 不做模板插值；插件 id 一律 allowlist 校验后才能参与后续步骤。
@@ -89,20 +104,6 @@ jobs:
 
           echo "PLUGIN_ID=$plugin_id" >> "$GITHUB_ENV"
 
-      - name: Checkout plugin-market repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          path: market
-
-      - name: Checkout Bench host workspace
-        # P12: indredK/bench 是 public 仓库 —— 匿名 checkout 即可，不携带 PAT，
-        # 并显式 persist-credentials: false 防止凭据落入 checkout 后的构建脚本环境。
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: indredK/bench
-          ref: ${{ needs.baseline.outputs.sha }}
-          path: bench
-          persist-credentials: false
 
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
