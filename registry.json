@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-13T17:16:10Z",
+  "updatedAt": "2026-09-16T06:06:07Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -168,6 +168,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.0.4",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/quick-launch-v1.0.4/bench-ext-quick-launch-v1.0.4.zip",
+          "sha256": "8197f0638f6ecc583208420ecaa6b41465ba9e42ffcf8ac3a1f06dd7b120bee1",
+          "size": 224809,
+          "publishedAt": "2026-09-16T06:06:07Z",
+          "yanked": false
+        },
         {
           "version": "1.0.3",
           "engines": {
