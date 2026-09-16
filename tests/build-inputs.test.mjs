@@ -108,16 +108,22 @@ describe("Action 固定与发布串行", () => {
     }
   })
 
-  it("build 与 release 共用同一个发布并发组且不可被取消", async () => {
-    const groups = []
+  it("发布并发组：rolling build 全局串行，release 按 tag 排队，均不可被取消", async () => {
+    // P13 验收实证：release-please 批量 bump 时会同时 dispatch 多个 tag 的
+    // release run，全局共享组会把它们互相取消。release.yml 因此改为按 ref
+    // 排队（plugin-release-<ref>，不同 tag 资产互不同名，并行安全）；
+    // build.yml 的 rolling release 仍必须全局单飞（同一批资产互相覆盖）。
     for (const file of PUBLISHING) {
       const raw = await read(`.github/workflows/${file}`)
       const group = raw.match(/^concurrency:[\s\S]*?^\s+group:\s*(\S+)/m)
       assert.ok(group, `${file} 必须有并发组`)
-      groups.push(group[1])
       assert.match(raw, /cancel-in-progress:\s*false/, `${file} 的发布不可被取消`)
+      if (file === "build.yml") {
+        assert.equal(group[1], "plugin-publish", "rolling build 必须全局单飞")
+      } else {
+        assert.match(group[1], /\$\{\{\s*github\.ref\s*\}\}/, "release 并发组必须按 ref 排队")
+      }
     }
-    assert.equal(new Set(groups).size, 1, `发布工作流必须串行，实际 ${groups.join(" / ")}`)
   })
 })
 
