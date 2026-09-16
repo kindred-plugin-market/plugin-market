@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/kindred-plugin-market/plugin-market/compare/token-calculator-v1.1.2...token-calculator-v1.1.3) (2026-09-16)
+
+
+### Bug Fixes
+
+* **terminology:** release acceptance patch for the new release pipeline ([#17](https://github.com/kindred-plugin-market/plugin-market/issues/17)) ([3c7672b](https://github.com/kindred-plugin-market/plugin-market/commit/3c7672be367d6a9e54ce9a62e7d8fabd6415a04d))
+
 ## [1.1.2](https://github.com/kindred-plugin-market/plugin-market/compare/token-calculator-v1.1.1...token-calculator-v1.1.2) (2026-09-13)
 
 

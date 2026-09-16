@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "terminology",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "display": {
     "zh": "专业术语",
     "en": "Terminology"

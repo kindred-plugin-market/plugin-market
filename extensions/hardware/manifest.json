@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "hardware",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "display": {
     "zh": "硬件查询",
     "en": "Hardware"
