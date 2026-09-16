@@ -61,12 +61,13 @@ jobs:
           path: market
 
       - name: Checkout Bench host workspace
+        # P12: public 宿主仓库匿名 checkout，不带 PAT 且不持久化凭据。
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: indredK/bench
           ref: ${{ needs.baseline.outputs.sha }}
-          token: ${{ secrets.BENCH_REPO_TOKEN }}
           path: bench
+          persist-credentials: false
 
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:

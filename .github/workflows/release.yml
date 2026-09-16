@@ -59,13 +59,35 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Resolve plugin id
+      - name: Resolve and validate plugin id (P12)
+        # 不可信上下文（workflow_dispatch inputs / tag 名）只经 env 进入 shell，
+        # 不做模板插值；插件 id 一律 allowlist 校验后才能参与后续步骤。
+        env:
+          INPUT_PLUGIN_ID: ${{ inputs.plugin_id }}
         run: |
-          if [ -n "${{ github.event.inputs.plugin_id }}" ]; then
-            echo "PLUGIN_ID=${{ github.event.inputs.plugin_id }}" >> "$GITHUB_ENV"
-          else
-            echo "PLUGIN_ID=${GITHUB_REF_NAME%-v*}" >> "$GITHUB_ENV"
+          set -euo pipefail
+          plugin_id="${INPUT_PLUGIN_ID:-${GITHUB_REF_NAME%-v*}}"
+
+          # tag 触发时必须严格匹配 <plugin-id>-v<semver>，防止 glob *-v* 误吞。
+          if [[ "${GITHUB_REF_TYPE:-branch}" == "tag" ]]; then
+            [[ "$GITHUB_REF_NAME" =~ ^([a-z0-9][a-z0-9-]*)-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] \
+              || { echo "::error::tag '$GITHUB_REF_NAME' 不匹配 <plugin-id>-v<X.Y.Z>（严格 semver）"; exit 1; }
+            [[ "${BASH_REMATCH[1]}" == "$plugin_id" ]] \
+              || { echo "::error::tag 前缀 '${BASH_REMATCH[1]}' 与解析出的插件 id '$plugin_id' 不一致"; exit 1; }
           fi
+
+          [[ "$plugin_id" =~ ^[a-z0-9][a-z0-9-]*$ ]] || { echo "::error::非法插件 id: $plugin_id"; exit 1; }
+          [[ -f "market/extensions/$plugin_id/manifest.json" ]] || { echo "::error::插件不存在: $plugin_id"; exit 1; }
+
+          # tag 触发时，tag 版本必须与该插件 manifest.json version 相等。
+          if [[ "${GITHUB_REF_TYPE:-branch}" == "tag" ]]; then
+            tag_version="${BASH_REMATCH[2]}"
+            manifest_version="$(node -p "JSON.parse(require('fs').readFileSync('market/extensions/$plugin_id/manifest.json','utf8')).version")"
+            [[ "$tag_version" == "$manifest_version" ]] \
+              || { echo "::error::tag 版本 $tag_version != manifest 版本 $manifest_version"; exit 1; }
+          fi
+
+          echo "PLUGIN_ID=$plugin_id" >> "$GITHUB_ENV"
 
       - name: Checkout plugin-market repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -73,12 +95,14 @@ jobs:
           path: market
 
       - name: Checkout Bench host workspace
+        # P12: indredK/bench 是 public 仓库 —— 匿名 checkout 即可，不携带 PAT，
+        # 并显式 persist-credentials: false 防止凭据落入 checkout 后的构建脚本环境。
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: indredK/bench
           ref: ${{ needs.baseline.outputs.sha }}
-          token: ${{ secrets.BENCH_REPO_TOKEN }}
           path: bench
+          persist-credentials: false
 
       - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
