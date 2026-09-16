@@ -85,9 +85,14 @@ describe("工具链：Node 与 pnpm", () => {
     assert.equal(pkg.packageManager, "pnpm@12.4.2");
   });
 
-  it("每个宿主工作流用 .node-version 且不硬编码 node-version", async () => {
+  it("宿主工作流固定主线 Node，质量门禁按矩阵切换兼容版本", async () => {
     for (const file of HOST_WORKFLOWS) {
       const raw = await read(`.github/workflows/${file}`);
+      if (file === "quality-gate.yml") {
+        assert.match(raw, /node-version:\s*\$\{\{\s*matrix\.node\s*\}\}/);
+        assert.doesNotMatch(raw, /node-version-file:/);
+        continue;
+      }
       const expected =
         file === "quality-gate.yml" ? ".node-version" : "market/.node-version";
       const declared = matchAll(raw, /node-version-file:\s*(\S+)/g).map(

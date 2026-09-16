@@ -31,8 +31,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       # Node 26.8.2（开发/CI 主线）+ Node 24.15（engines.node 最低合同）。
-      # 审计 §6-2：24.15 兼容只跑静态测试与 i18n audit；宿主工具链 parity 与
-      # extension tests 仍由 26.8.2 承担。
+      # 两个矩阵项必须真的切换运行时；只声明矩阵名称会把最低版本合同变成假绿。
       matrix:
         node: ["26.8.2", "24.15.0"]
     steps:
@@ -48,7 +47,7 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version-file: .node-version
+          node-version: ${{ matrix.node }}
           cache: pnpm
           cache-dependency-path: |
             pnpm-lock.yaml
