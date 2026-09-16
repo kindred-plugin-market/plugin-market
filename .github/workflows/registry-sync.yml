@@ -1,0 +1,83 @@
+name: Registry synchronization
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin_id:
+        description: "Release plugin id (used for audit output)"
+        required: true
+        type: string
+      version:
+        description: "Release version (used for audit output)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: plugin-registry-sync
+  cancel-in-progress: false
+
+env:
+  PNPM_VERSION: 12.4.2
+  REGISTRY_BRANCH: bot/registry-sync
+
+jobs:
+  sync:
+    name: synchronize registry (${{ inputs.plugin_id }}@${{ inputs.version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install market dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Push one convergent registry branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLUGIN_ID: ${{ inputs.plugin_id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main --depth=1
+          git checkout -B "$REGISTRY_BRANCH" origin/main
+          # 触发该工作流的发布资产必须先严格存在；全量同步只负责补齐历史版本。
+          node scripts/update-registry.mjs \
+            --plugin "$PLUGIN_ID" \
+            --version "$PLUGIN_VERSION"
+          node scripts/update-registry.mjs --all --skip-missing
+          git add registry.json
+          if git diff --cached --quiet; then
+            echo "registry.json unchanged"
+            exit 0
+          fi
+          git commit -m "chore(registry): synchronize published releases"
+          git push --force-with-lease origin "$REGISTRY_BRANCH"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REGISTRY_BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing_pr" ]; then
+            echo "registry PR already exists: #$existing_pr"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$REGISTRY_BRANCH" \
+              --base main \
+              --title "chore(registry): synchronize published releases" \
+              --body "自动汇总已发布插件资产；同一固定分支串行更新，避免并行 tag 发布产生互相覆盖的 registry PR。"
+          fi

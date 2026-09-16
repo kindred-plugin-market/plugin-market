@@ -60,6 +60,7 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write
+      actions: write
       # P11：registry 写回走 bot 分支 + PR —— gh pr create 需要 PR 写权限。
       pull-requests: write
     steps:
@@ -203,48 +204,17 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      # 市场索引自持（P5/P11）：zip 上传后把该版本 upsert 进 registry.json，
-      # 但不再直推 main —— 改为 bot 分支 + PR，等 quality gate 绿色后合并。
-      # 这样 registry 写回与其它进入 main 的路径一样经过同一质量闸门，
-      # 无法借发布通道绕过分支保护（P11）。
-      - name: Open registry update pull request
+      # 市场索引自持（P5/P11）：发布完成后触发单例同步工作流。
+      # 同一固定分支承载所有待合并版本，避免 7 个 tag 同时发布时互相覆盖。
+      - name: Dispatch serialized registry synchronization
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME##*-v}"
-          branch="bot/registry-${PLUGIN_ID}-v${version}"
-          echo "Registry update: ${PLUGIN_ID}@${version} -> branch $branch"
-          cd market
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # 从 main 最新状态开工（tag 可能落后于 main，避免 PR 带回旧提交）。
-          git fetch origin main --depth=1
-          git checkout -B "$branch" origin/main
-          node scripts/update-registry.mjs \
-            --plugin "$PLUGIN_ID" \
-            --version "$version" \
-            --dist "$GITHUB_WORKSPACE/dist"
-          git add registry.json
-          if git diff --cached --quiet; then
-            echo "registry.json unchanged"
-            exit 0
-          fi
-          git commit -m "chore(registry): publish ${PLUGIN_ID} v${version}"
-          # 幂等：同 tag 重跑时远程可能残留同名 bot 分支（上次 run 的 PR 已删
-          # 或未合并）——先删再推，保证分支内容 = 本次快照。
-          git push origin --delete "$branch" 2>/dev/null || true
-          git push origin "$branch"
-          # 已存在同名 PR 时复用（重跑场景），否则新建。
-          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --state open --json number --jq '.[0].number // empty')"
-          if [ -n "$existing_pr" ]; then
-            echo "registry PR 已存在: #$existing_pr（复用）"
-          else
-            gh pr create \
-              --repo "$GITHUB_REPOSITORY" \
-              --head "$branch" \
-              --base main \
-              --title "chore(registry): publish ${PLUGIN_ID} v${version}" \
-              --body "自动 registry 写回（release.yml @ ${GITHUB_SHA}）。合并前必须通过 quality gate（P11：写回也走 PR）。"
-          fi
+          gh workflow run registry-sync.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f plugin_id="$PLUGIN_ID" \
+            -f version="$version"
