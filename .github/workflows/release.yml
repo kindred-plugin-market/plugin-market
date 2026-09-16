@@ -60,6 +60,8 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write
+      # P11：registry 写回走 bot 分支 + PR —— gh pr create 需要 PR 写权限。
+      pull-requests: write
     steps:
       - name: Checkout plugin-market repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
