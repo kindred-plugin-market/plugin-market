@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-16T06:04:28Z",
+  "updatedAt": "2026-09-16T06:43:14Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -141,6 +141,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "0.1.2",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/photo-triage-v0.1.2/bench-ext-photo-triage-v0.1.2.zip",
+          "sha256": "1ff9ed5d48b7be76c97e5c4200ea4aedf6b21a1c12a9ec011fccf82806c1fe2b",
+          "size": 180415,
+          "publishedAt": "2026-09-16T06:43:14Z",
+          "yanked": false
+        },
         {
           "version": "0.1.1",
           "engines": {
