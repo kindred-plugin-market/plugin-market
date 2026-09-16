@@ -183,21 +183,25 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
-      # 市场索引自持（P5）：zip 上传后把该版本 upsert 进 registry.json 并推回 main。
-      # Bench 每次打开市场都实时拉 registry.json → 推完即在插件中心可见，
-      # 无需改 Bench、无需手工维护 registry、无需发版宿主。
-      - name: Update market registry
+      # 市场索引自持（P5/P11）：zip 上传后把该版本 upsert 进 registry.json，
+      # 但不再直推 main —— 改为 bot 分支 + PR，等 quality gate 绿色后合并。
+      # 这样 registry 写回与其它进入 main 的路径一样经过同一质量闸门，
+      # 无法借发布通道绕过分支保护（P11）。
+      - name: Open registry update pull request
         if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME##*-v}"
-          echo "Updating registry: ${PLUGIN_ID}@${version}"
+          branch="bot/registry-${PLUGIN_ID}-v${version}"
+          echo "Registry update: ${PLUGIN_ID}@${version} -> branch $branch"
           cd market
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # 从 main 最新状态开工（tag 可能落后于 main，避免把 main 推回旧提交）。
+          # 从 main 最新状态开工（tag 可能落后于 main，避免 PR 带回旧提交）。
           git fetch origin main --depth=1
-          git checkout -B main origin/main
+          git checkout -B "$branch" origin/main
           node scripts/update-registry.mjs \
             --plugin "$PLUGIN_ID" \
             --version "$version" \
@@ -208,5 +212,10 @@ jobs:
             exit 0
           fi
           git commit -m "chore(registry): publish ${PLUGIN_ID} v${version}"
-          git pull --rebase origin main
-          git push origin main
+          git push origin "$branch"
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --head "$branch" \
+            --base main \
+            --title "chore(registry): publish ${PLUGIN_ID} v${version}" \
+            --body "自动 registry 写回（release.yml @ ${GITHUB_SHA}）。合并前必须通过 quality gate（P11：写回也走 PR）。"

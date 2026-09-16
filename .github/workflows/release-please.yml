@@ -55,20 +55,23 @@ jobs:
 
       # 新增插件自动登记：extensions/ 下出现新目录即补进 config / manifest，
       # 使本次 release-please 就能识别（不必手改 release-please-config.json）。
-      - name: Sync release-please config
+      # P11：不再直推 main —— 有 diff 时失败退出并列出 diff（fail-with-diff），
+      # 由维护者提交登记变更或跑一次手动 dispatch 的登记 PR；配置同步必须与
+      # 其它 main 变更一样走 PR 与质量门禁。
+      - name: Sync release-please config (fail with diff)
         run: |
           set -euo pipefail
           node scripts/sync-release-please.mjs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add release-please-config.json .release-please-manifest.json
           if git diff --cached --quiet; then
             echo "release-please config in sync"
             exit 0
           fi
-          git commit -m "chore: register plugins with release-please"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo "::error::release-please 配置与 extensions/ 不同步 —— P11 后不允许直推 main。"
+          git diff --cached --stat
+          git diff --cached -- release-please-config.json .release-please-manifest.json | head -200
+          echo "修复方式：本地运行 node scripts/sync-release-please.mjs 后以 PR 提交这两个文件。"
+          exit 1
 
       # 诊断提示：GITHUB_TOKEN 建 PR 依赖仓库开关「Allow GitHub Actions to create
       # and approve pull requests」；组织策略禁用时该开关是灰的，此时必须改用
