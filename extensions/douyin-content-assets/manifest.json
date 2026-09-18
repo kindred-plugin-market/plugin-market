@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "douyin-content-assets",
+  "version": "0.1.0",
+  "display": {
+    "zh": "抖音内容资产",
+    "en": "Douyin Content Assets"
+  },
+  "description": {
+    "zh": "抖音内容资产：经 Companion 手动采集可见条目、导入本地视频并查看宿主识别能力状态（P1）",
+    "en": "Douyin Content Assets: capture visible entries via Companion, import local videos, inspect host media capabilities (P1)"
+  },
+  "distribution": "bundled",
+  "entry": {
+    "index": "index.html"
+  },
+  "acl": {
+    "commands": [
+      "douyin_assets_get_capabilities",
+      "douyin_assets_list_items",
+      "douyin_assets_import_files",
+      "douyin_assets_delete_items"
+    ]
+  },
+  "engines": {
+    "bench": ">=1.33.0"
+  }
+}

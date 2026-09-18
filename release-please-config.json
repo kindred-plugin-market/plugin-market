@@ -77,6 +77,17 @@
           "jsonpath": "$.version"
         }
       ]
+    },
+    "extensions/douyin-content-assets": {
+      "release-type": "simple",
+      "component": "douyin-content-assets",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
     }
   }
 }

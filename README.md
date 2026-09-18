@@ -16,6 +16,7 @@
 | [`terminology`](./extensions/terminology/) | 术语库：三层术语管理 + 搜索/置顶 | 1.0.0 |
 | [`hardware`](./extensions/hardware/) | 硬件查询：多品类参数对比（纯前端零 IPC） | 1.0.0 |
 | [`clean-space`](./extensions/clean-space/) | 存储空间：存储总览 / dev-cleaner / 自定义清理（macOS） | 1.0.0 |
+| [`douyin-content-assets`](./extensions/douyin-content-assets/docs/README.md) | 抖音内容资产：Companion 采集可见条目 + 本地视频导入（P1 骨架，识别待 DCA-02） | 0.1.0 |
 
 ## 跨端出口（bench-host）
 
