@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-16T07:36:34Z",
+  "updatedAt": "2026-09-18T08:18:49Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -96,6 +96,33 @@
           "sha256": "1071e8b3dc7e5e658c5ac3caa51fa0a572581da29b527b2803194de5c2e0d85f",
           "size": 198855,
           "publishedAt": "2026-09-08T17:32:54Z",
+          "yanked": false
+        }
+      ]
+    },
+    {
+      "id": "douyin-content-assets",
+      "display": {
+        "zh": "抖音内容资产",
+        "en": "Douyin Content Assets"
+      },
+      "description": {
+        "zh": "抖音内容资产：经 Companion 手动采集可见条目、导入本地视频并查看宿主识别能力状态（P1）",
+        "en": "Douyin Content Assets: capture visible entries via Companion, import local videos, inspect host media capabilities (P1)"
+      },
+      "publisher": {
+        "name": "Kindred Plugin Market"
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engines": {
+            "bench": ">=1.33.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/douyin-content-assets-v0.1.0/bench-ext-douyin-content-assets-v0.1.0.zip",
+          "sha256": "70244facfd58cfa81faea9479599d77aea88f36e8ae5807a9111756bd7ca22f7",
+          "size": 153020,
+          "publishedAt": "2026-09-18T08:18:49Z",
           "yanked": false
         }
       ]
