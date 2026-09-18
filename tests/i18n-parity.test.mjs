@@ -76,16 +76,16 @@ describe("check-i18n-parity 的宿主输入校验（R04）", () => {
     const result = runParity(dir)
     assert.equal(result.status, 1, `${result.stdout}${result.stderr}`)
     assert.match(result.stdout, /宿主模块无法解析/)
-    assert.match(result.stdout, /expected=7 discovered=7 checked=7 failed=7/)
+    assert.match(result.stdout, /expected=8 discovered=8 checked=8 failed=8/)
   })
 
   it(
-    "真实宿主 + 真实市场 → 7/7 通过",
+    "真实宿主 + 真实市场 → 8/8 通过",
     { skip: !resolveRealHost() && "no bench host checkout next to the market" },
     () => {
       const result = runParity(resolveRealHost())
       assert.equal(result.status, 0, `${result.stdout}${result.stderr}`)
-      assert.match(result.stdout, /expected=7 discovered=7 checked=7 failed=0/)
+      assert.match(result.stdout, /expected=8 discovered=8 checked=8 failed=0/)
     },
   )
 })

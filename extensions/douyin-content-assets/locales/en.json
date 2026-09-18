@@ -1,0 +1,111 @@
+{
+  "translation": {
+    "douyinAssets": {
+      "title": "Douyin Content Assets",
+      "loading": "Loading library...",
+      "loadFailedTitle": "Failed to load library",
+      "loadFailedFallback": "Please retry; check host logs if it keeps failing",
+      "tabs": {
+        "library": "Library",
+        "capture": "Capture guide"
+      },
+      "library": {
+        "searchPlaceholder": "Search title or author",
+        "listTypeAll": "All sources",
+        "listType": {
+          "favorite": "Favorites",
+          "like": "Likes",
+          "watch_later": "Watch later",
+          "profile": "Posts",
+          "other": "Other"
+        },
+        "listTypeLabel": "Source",
+        "refresh": "Refresh",
+        "importButton": "Import local videos",
+        "importCancelled": "No file selected",
+        "importDone": "Imported {{imported}} video(s), skipped {{duplicates}} duplicate(s)",
+        "deleteButton": "Delete ({{count}})",
+        "deleteDone": "Deleted {{count}} record(s)",
+        "deleteTitle": "Delete selected records?",
+        "deleteDescription": "{{count}} captured record(s) will be soft-deleted (data stays in the host and can be purged later).",
+        "countLine": "Showing {{shown}} of {{total}}",
+        "empty": "No entries yet. Open a Douyin page with Bench Companion and click \"Read visible entries\" to start capturing.",
+        "untitled": "(untitled)",
+        "status": {
+          "new": "Awaiting video",
+          "imported": "Video ready"
+        },
+        "hasVideo": "Local video imported"
+      },
+      "capture": {
+        "howToTitle": "How to capture Douyin entries",
+        "step1": "Open your Douyin favorites / likes / posts list page in the browser.",
+        "step2": "Click the Bench Companion icon in the browser toolbar.",
+        "step3": "Pick a list type under \"Douyin capture\" and click \"Read visible entries\".",
+        "step4": "Review the previewed entries, then click \"Submit to Bench\" to confirm.",
+        "step5": "Scroll to the next screen and read again to keep capturing; refresh this library afterwards.",
+        "boundaryNote": "Boundary: only entries visible on the current page are read. No cookies, no network interception, no auto-scrolling, and no like/favorite/follow/comment actions.",
+        "capabilitiesTitle": "Capabilities",
+        "bridgeReady": "Local bridge (Companion submit channel)",
+        "stateReady": "Ready",
+        "stateUnavailable": "Unavailable",
+        "stateNotInstalled": "Not installed",
+        "mediaWorker": "Media worker (ASR / OCR, arrives with DCA-02)",
+        "limitsLine": "Batch limit {{maxBatchItems}} entries; single-file import limit {{maxImportFileBytes}}."
+      }
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "optional": "Optional",
+      "included": "Included",
+      "na": "—",
+      "withParenthesis": "{{prefix}} ({{detail}})",
+      "desktopOnly": "This feature is only available in the desktop version of Bench.",
+      "platformUnsupported": "This feature is not available on {{platform}}.",
+      "platformNames": {
+        "macos": "macOS",
+        "windows": "Windows",
+        "linux": "Linux"
+      },
+      "appTitle": "Bench - DevTools",
+      "close": "Close",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "save": "Save",
+      "enable": "Enable",
+      "disable": "Disable",
+      "add": "Add",
+      "edit": "Edit",
+      "persistence": {
+        "recovered": "Saved classifications were unreadable. A backup was kept and the defaults were restored.",
+        "newerSchema": "Saved classifications were created by a newer Bench version. Editing is disabled to protect them.",
+        "tooLarge": "Saved classifications exceed the safety limit. Editing is disabled until the data is reviewed."
+      },
+      "search": "Search",
+      "loading": "Loading...",
+      "filters": "Filters",
+      "failedToLoad": "Failed to load",
+      "loadFailed": "Failed to load",
+      "featureLoadFailed": "Failed to load {{feature}}",
+      "retry": "Retry",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "details": "Details",
+      "unknown": "Unknown",
+      "actions": {
+        "close": "Close"
+      },
+      "empty": {
+        "noData": "No items to display",
+        "selectItem": "Select an item to view details"
+      },
+      "refresh": "Refresh",
+      "clear": "Clear"
+    }
+  }
+}
