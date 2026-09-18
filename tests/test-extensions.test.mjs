@@ -195,10 +195,10 @@ describe("runner 进程行为", () => {
   })
 })
 
-describe("真实市场静态契约（7/7 的前提）", () => {
+describe("真实市场静态契约（8/8 的前提）", () => {
   it("每个插件目录都有 manifest.json，测试契约完整", () => {
     const { expected, ignored } = discoverExtensions(join(ROOT, "extensions"))
-    assert.equal(expected.length, 7, `期望 7 个插件，实际 ${expected.length}`)
+    assert.equal(expected.length, 8, `期望 8 个插件，实际 ${expected.length}`)
     assert.deepEqual(ignored, [], "extensions/ 下不允许出现没有 manifest.json 的目录")
     assert.deepEqual(missingTestContract(join(ROOT, "extensions"), expected), [])
   })
