@@ -89,6 +89,17 @@ export async function loadRecords() {
 }
 
 /**
+ * 后端真实回执：调用方（toast / 详情面板）必须用这几个数字，而不是前端的扫描估值。
+ * `requested` 是实际下发给后端的条目数（已过滤不可清理项），`cleaned + failed` 与之相等。
+ */
+export interface BatchCleanupSummary {
+  requested: number
+  cleaned: number
+  failed: number
+  freedBytes: number
+}
+
+/**
  * Execute a batch cleanup of the given items, streaming progress into the store
  * and recording the result when finished. Caller is only responsible for
  * collecting the user's selection and closing the confirm UI.
@@ -97,10 +108,15 @@ export async function loadRecords() {
  * not have to recompute time at render (which would make all entries share
  * the same "now" value on each re-render).
  */
-export async function executeBatchCleanup(category: StorageCategory, items: StorageItem[]) {
+export async function executeBatchCleanup(
+  category: StorageCategory,
+  items: StorageItem[],
+): Promise<BatchCleanupSummary> {
   const store = useCleanSpaceStore.getState()
   const cleanableItems = items.filter(canCleanStorageItem)
-  if (cleanableItems.length === 0) return
+  if (cleanableItems.length === 0) {
+    return { requested: 0, cleaned: 0, failed: 0, freedBytes: 0 }
+  }
 
   store.setIsCleaning(true)
 
@@ -217,6 +233,15 @@ export async function executeBatchCleanup(category: StorageCategory, items: Stor
         console.warn("[clean-space] post-cleanup overview refresh failed:", getErrorMessage(err))
       }
     })()
+
+    // 把后端回执透传给调用方：FORBIDDEN_PATH / 权限拒绝 / docker 未装这类单项失败
+    // 只有在这里数得清，调用方据此决定 toast 是成功还是「部分失败」。
+    return {
+      requested: cleanableItems.length,
+      cleaned: cleanedIds.length,
+      failed,
+      freedBytes,
+    }
   } finally {
     store.setIsCleaning(false)
   }

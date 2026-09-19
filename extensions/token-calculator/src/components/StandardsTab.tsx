@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Plus, Trash2, Save, X, Edit3 } from "lucide-react"
 import { useGuardedAsync } from "@/hooks/useGuardedAsync"
+import { getErrorCode } from "@/lib/tauri/errors"
 import {
   createPricingStandard,
   updatePricingStandard,
@@ -47,6 +48,13 @@ const EMPTY_MODEL: ModelPricing = {
   outputPrice: 0,
   currency: "USD",
 }
+
+/**
+ * 后端 `TokenCalculatorError::DuplicateName` 经 serde(tag = "code",
+ * rename_all = "SCREAMING_SNAKE_CASE") 序列化后的错误码；前端只能按 code 判定，
+ * 按 message 文本匹配会随措辞变化失效。
+ */
+const DUPLICATE_NAME_CODE = "DUPLICATE_NAME"
 
 function ModelRow({
   model,
@@ -150,20 +158,27 @@ export function StandardsTab({
 
   const handleCreate = () =>
     runMutation(async () => {
+      // 未填模型名的行不会下发（后端也按 trim 判空）。过去静默丢弃仍报「已创建」，
+      // 用户以为整表都存了 —— 有跳过就必须明确说清跳了几行。
+      const models = newModels.filter((m) => m.modelName.trim())
+      const skipped = newModels.length - models.length
       try {
-        await createPricingStandard(
-          newName,
-          newModels.filter((m) => m.modelName),
-        )
-        toast.success(t("tokenCalculator.toasts.created"))
+        await createPricingStandard(newName, models)
+        if (skipped > 0) {
+          toast.warning(t("tokenCalculator.toasts.createdSkipped", { skipped }))
+        } else {
+          toast.success(t("tokenCalculator.toasts.created"))
+        }
         setShowCreate(false)
         setNewName("")
         setNewModels([{ ...EMPTY_MODEL }])
         onRefresh()
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : String(e)
+        // Tauri 命令 reject 的是 {code,message} 对象而非 Error，`e instanceof Error` 恒
+        // false、String(e) 得到 [object Object]，原先的 includes("already exists") 是死
+        // 代码 —— 用宿主 helper 按后端错误码判定。
         toast.error(
-          msg.includes("already exists")
+          getErrorCode(e) === DUPLICATE_NAME_CODE
             ? t("tokenCalculator.toasts.duplicateName")
             : t("tokenCalculator.toasts.createFailed"),
         )
@@ -198,17 +213,25 @@ export function StandardsTab({
   const handleUpdate = () =>
     runMutation(async () => {
       if (!editingId) return
+      // 与 handleCreate 同理：无名行不下发时要说清跳过了几行，不能默默少存
+      const models = editModels.filter((m) => m.modelName.trim())
+      const skipped = editModels.length - models.length
       try {
-        await updatePricingStandard(
-          editingId,
-          editName,
-          editModels.filter((m) => m.modelName),
-        )
-        toast.success(t("tokenCalculator.toasts.updated"))
+        await updatePricingStandard(editingId, editName, models)
+        if (skipped > 0) {
+          toast.warning(t("tokenCalculator.toasts.updatedSkipped", { skipped }))
+        } else {
+          toast.success(t("tokenCalculator.toasts.updated"))
+        }
         cancelEdit()
         onRefresh()
-      } catch {
-        toast.error(t("tokenCalculator.toasts.updateFailed"))
+      } catch (e: unknown) {
+        // 改名撞上别的标准后端同样返回 DUPLICATE_NAME，得和「创建重名」一样区分出来
+        toast.error(
+          getErrorCode(e) === DUPLICATE_NAME_CODE
+            ? t("tokenCalculator.toasts.duplicateName")
+            : t("tokenCalculator.toasts.updateFailed"),
+        )
       }
     })
 

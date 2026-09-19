@@ -133,6 +133,7 @@
       "cleaning": "Cleaning…",
       "toast": {
         "cleanupSuccess": "Successfully cleaned {{count}} items, freed {{size}}",
+        "cleanupPartial": "Cleaned {{cleaned}} of {{requested}} items — {{failed}} still remain (freed {{size}})",
         "cleanupFailed": "Cleanup failed, please try again"
       },
       "categories": {

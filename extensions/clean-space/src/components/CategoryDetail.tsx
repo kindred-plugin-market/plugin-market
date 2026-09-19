@@ -183,18 +183,29 @@ export function CategoryDetail() {
       return
     }
 
-    const totalBytes = selectedItems.reduce((sum, i) => sum + i.size_bytes, 0)
-
     try {
-      await executeBatchCleanup(category, selectedItems)
+      // toast 一律用后端回执而不是扫描估值：FORBIDDEN_PATH / 权限拒绝 / docker 未装
+      // 这类单项失败过去也报全绿，用户会以为空间已经释放。
+      const summary = await executeBatchCleanup(category, selectedItems)
       setConfirmOpen(false)
       setSelected(new Set())
-      toast.success(
-        t("cleanSpace.toast.cleanupSuccess", {
-          count: selectedItems.length,
-          size: formatSize(totalBytes),
-        }),
-      )
+      if (summary.failed > 0) {
+        toast.warning(
+          t("cleanSpace.toast.cleanupPartial", {
+            cleaned: summary.cleaned,
+            requested: summary.requested,
+            failed: summary.failed,
+            size: formatSize(summary.freedBytes),
+          }),
+        )
+      } else {
+        toast.success(
+          t("cleanSpace.toast.cleanupSuccess", {
+            count: summary.cleaned,
+            size: formatSize(summary.freedBytes),
+          }),
+        )
+      }
     } catch (err) {
       toast.error(t("cleanSpace.toast.cleanupFailed"))
     }

@@ -61,6 +61,7 @@
       "folderEmptyHint": "（点右侧 ＋ 添加任意文件夹为待选，把图片拖上去即可移动）",
       "moveInto": "移入 {{path}}",
       "movedItems": "已把 {{count}} 项移入 📁 {{path}}",
+      "movedItemsWarn": "已把 {{count}} 项移入 📁 {{path}}；{{count2}} 项未移动",
       "moveConfirmTitle": "确认移动",
       "moveConfirmDesc": "将 {{count}} 项移入 📁 {{path}}？",
       "revealInFinder": "在访达中显示",

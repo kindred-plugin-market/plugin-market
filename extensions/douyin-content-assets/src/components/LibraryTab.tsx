@@ -5,6 +5,7 @@ import { FolderInput, RefreshCw, Search, Trash2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useGuardedAsync } from "@/hooks/useGuardedAsync"
+import { getErrorMessage } from "@/lib/tauri/errors"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -68,7 +69,13 @@ export function LibraryTab({ controller }: { controller: Controller }) {
           }),
         )
       } catch (error) {
-        toast.error(typeof error === "string" ? error : String(error))
+        // `{code,message}` 形态的 reject 经 String() 会变成 [object Object]，必须用
+        // 宿主 getErrorMessage 取 message 再套 i18n 前缀（与 app-manager 同一写法）。
+        toast.error(
+          t("douyinAssets.library.importFailed", {
+            message: getErrorMessage(error, t("common.unknown")),
+          }),
+        )
       }
     })
 
@@ -83,7 +90,12 @@ export function LibraryTab({ controller }: { controller: Controller }) {
         toast.success(t("douyinAssets.library.deleteDone", { count: outcome.itemsDeleted }))
         setSelected(new Set())
       } catch (error) {
-        toast.error(typeof error === "string" ? error : String(error))
+        // 同上：软删失败也要给出可读原因，而不是 [object Object]
+        toast.error(
+          t("douyinAssets.library.deleteFailed", {
+            message: getErrorMessage(error, t("common.unknown")),
+          }),
+        )
       }
     })
 

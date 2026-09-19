@@ -96,8 +96,10 @@
       },
       "toasts": {
         "created": "Pricing standard created",
+        "createdSkipped": "Pricing standard created, but {{skipped}} row(s) without a model name were not saved",
         "createFailed": "Failed to create pricing standard",
         "updated": "Pricing standard updated",
+        "updatedSkipped": "Pricing standard updated, but {{skipped}} row(s) without a model name were not saved",
         "updateFailed": "Failed to update pricing standard",
         "deleted": "Pricing standard deleted",
         "deleteFailed": "Failed to delete pricing standard",

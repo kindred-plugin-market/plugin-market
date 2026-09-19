@@ -251,6 +251,10 @@ export const usePhotoTriageStore = create<PhotoTriageState>((set, get) => ({
     const newDeleted = [...s.deletedIds]
     let currentId = s.currentId
     const movedOut: string[] = []
+    // from → 移动后的新对象。相册内移动只换 id/路径，条目必须留在列表里：
+    // 旧实现先 itemsById.delete(from)，再用 itemsById.has(it.id) 过滤，把旧 id 滤掉
+    // 而新对象从没插回数组 → 照片从列表与「共 N」计数里凭空消失。
+    const movedById = new Map<string, PhotoItem>()
     for (const u of updates) {
       const old = itemsById.get(u.from)
       if (!old) continue
@@ -263,6 +267,7 @@ export const usePhotoTriageStore = create<PhotoTriageState>((set, get) => ({
         video: u.video ?? null,
       }
       itemsById.set(u.to, moved)
+      movedById.set(u.from, moved)
       if (newSel[u.from] !== undefined) {
         newSel[u.to] = newSel[u.from]
         delete newSel[u.from]
@@ -271,12 +276,12 @@ export const usePhotoTriageStore = create<PhotoTriageState>((set, get) => ({
         newDeleted.push(u.to)
       }
       if (currentId === u.from) currentId = u.to
+      // folder 为绝对路径 = 已移出相册根目录，由调用方 removeItems 从列表剔除
       if (u.folder.startsWith("/")) movedOut.push(u.to)
     }
     set({
-      items: s.items
-        .map((it) => (itemsById.has(it.id) ? itemsById.get(it.id)! : it))
-        .filter((it) => itemsById.has(it.id)),
+      // 命中旧 id 就地换成移动后的对象（顺序不变），其余条目原样保留
+      items: s.items.map((it) => movedById.get(it.id) ?? it),
       sel: newSel,
       deletedIds: newDeleted,
       currentId,
