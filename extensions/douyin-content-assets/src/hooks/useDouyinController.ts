@@ -7,7 +7,9 @@
  * - store 不在此文件——本插件状态简单，controller 即唯一编排者。
  */
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
+import { getErrorMessage } from "@/lib/tauri/errors"
 import {
   deleteItems,
   getCapabilities,
@@ -23,6 +25,9 @@ const PAGE_SIZE = 50
 export type LoadPhase = "loading" | "ready" | "failed"
 
 export function useDouyinController() {
+  // 后端 reject 的是 `{code,message}` 对象，`String(error)` 只会显示 [object Object]；
+  // 统一走宿主的 getErrorMessage，并带一条 i18n 兜底文案（message 为空时界面不至于空白）。
+  const { t } = useTranslation()
   const [capabilities, setCapabilities] = useState<DouyinCapabilities | null>(null)
   const [capabilitiesError, setCapabilitiesError] = useState<string | null>(null)
   const [items, setItems] = useState<CapturedItem[]>([])
@@ -43,9 +48,9 @@ export function useDouyinController() {
       setCapabilities(next)
     } catch (error) {
       setCapabilities(null)
-      setCapabilitiesError(typeof error === "string" ? error : String(error))
+      setCapabilitiesError(getErrorMessage(error, t("douyinAssets.loadFailedFallback")))
     }
-  }, [])
+  }, [t])
 
   const loadItems = useCallback(
     async (nextListType: ListTypeKey | "all", nextSearch: string) => {
@@ -69,11 +74,11 @@ export function useDouyinController() {
         setItems([])
         setTotal(0)
         setHasMore(false)
-        setListError(typeof error === "string" ? error : String(error))
+        setListError(getErrorMessage(error, t("douyinAssets.loadFailedFallback")))
         setPhase("failed")
       }
     },
-    [],
+    [t],
   )
 
   const refresh = useCallback(() => {

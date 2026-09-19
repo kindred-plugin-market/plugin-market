@@ -43,6 +43,9 @@ function OverviewSection() {
     return (
       <ScrollableArea className="flex h-full flex-col" wrapperClassName="h-full">
         <CategoryDetail />
+        {/* 详情分支也要渲染进度面板：批量清理的失败汇总（结果卡 + 执行日志）
+            过去只在总览分支出现，下钻详情里清理时这块信息完全看不见。 */}
+        <CleanupProgress />
       </ScrollableArea>
     )
   }

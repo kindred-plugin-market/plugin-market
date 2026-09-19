@@ -133,6 +133,7 @@
       "cleaning": "清理中…",
       "toast": {
         "cleanupSuccess": "成功清理 {{count}} 个项目，释放 {{size}}",
+        "cleanupPartial": "已清理 {{cleaned}}/{{requested}} 项，仍有 {{failed}} 项未清掉（释放 {{size}}）",
         "cleanupFailed": "清理失败，请重试"
       },
       "categories": {

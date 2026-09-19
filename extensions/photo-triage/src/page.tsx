@@ -89,16 +89,37 @@ function FoldersBar({
     }
   }
 
-  const handleChipClick = (folder: string) => {
-    void moveToFolder(folder).then((res) => {
-      if (res.ok) {
-        toast(t("photoTriage.movedItems", { count: res.count, path: prettyPath(folder) }))
-      } else if (res.reason === "empty") {
-        toast(t("photoTriage.pickFirst"))
+  /**
+   * 移动结果回执：后端逐条失败（已在目标夹 / 原文件不存在…）只体现在 res.errors，
+   * 必须用 warning toast 说清「N 项成功、M 项未移动」，不能再报全绿。
+   */
+  const reportMove = (
+    res: { ok: boolean; reason: "empty" | "ok" | "failed"; count: number; failed: number },
+    folder: string,
+  ) => {
+    if (res.ok) {
+      if (res.failed > 0) {
+        toast.warning(
+          t("photoTriage.movedItemsWarn", {
+            count: res.count,
+            count2: res.failed,
+            path: prettyPath(folder),
+          }),
+        )
       } else {
-        toast(t("photoTriage.moveFailed"))
+        toast(t("photoTriage.movedItems", { count: res.count, path: prettyPath(folder) }))
       }
-    })
+      return
+    }
+    if (res.reason === "empty") {
+      toast(t("photoTriage.pickFirst"))
+      return
+    }
+    toast(t("photoTriage.moveFailed"))
+  }
+
+  const handleChipClick = (folder: string) => {
+    void moveToFolder(folder).then((res) => reportMove(res, folder))
   }
 
   const handleDrop = (folder: string, e: React.DragEvent) => {
@@ -115,13 +136,7 @@ function FoldersBar({
     if (!pendingMove) return
     const { ids, folder } = pendingMove
     setPendingMove(null)
-    void moveToFolder(folder, ids).then((res) => {
-      if (res.ok) {
-        toast(t("photoTriage.movedItems", { count: res.count, path: prettyPath(folder) }))
-      } else {
-        toast(t("photoTriage.moveFailed"))
-      }
-    })
+    void moveToFolder(folder, ids).then((res) => reportMove(res, folder))
   }
 
   const handleSelectAll = () => {

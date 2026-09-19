@@ -206,16 +206,38 @@ export const useTerminologyStore = create<TerminologyState>((set, get) => ({
     })
   },
   updateTerm: async (term) => {
+    // 回写前必须带上当前三级选中：stateFromData 不传 preferred 时 validateSelection
+    // 会回落 industries[0]，在非首行业编辑词条后视图跳回第一个行业、刚改的条目看不见。
+    // 子分类取 term 自身（编辑器可把词条移到别的子分类），与 addTerm 用 created.* 一致。
+    const { selectedIndustryId, selectedCategoryId } = get()
     const data = await updateTermUC(term)
-    set({ ...stateFromData(data), isLoading: false })
+    set({
+      ...stateFromData(
+        data,
+        term.industryId || selectedIndustryId,
+        term.categoryId || selectedCategoryId,
+        term.subcategoryId ?? "",
+      ),
+      isLoading: false,
+    })
   },
   deleteTerm: async (id) => {
+    // 同 updateTerm：删除后停留在当前三级选中，不回落到第一个行业
+    const { selectedIndustryId, selectedCategoryId, selectedSubcategoryId } = get()
     const data = await deleteTermUC(id)
-    set({ ...stateFromData(data), isLoading: false })
+    set({
+      ...stateFromData(data, selectedIndustryId, selectedCategoryId, selectedSubcategoryId),
+      isLoading: false,
+    })
   },
   setTermPinned: async (id, value) => {
+    // 置顶不改变词条归属，回写时保持当前三级选中，视图不该跳回第一个行业
+    const { selectedIndustryId, selectedCategoryId, selectedSubcategoryId } = get()
     const data = await setTermPinnedUC(id, value)
-    set({ ...stateFromData(data), isLoading: false })
+    set({
+      ...stateFromData(data, selectedIndustryId, selectedCategoryId, selectedSubcategoryId),
+      isLoading: false,
+    })
   },
 
   filteredTerms: () => {

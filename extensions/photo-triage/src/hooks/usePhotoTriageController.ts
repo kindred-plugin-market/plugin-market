@@ -199,12 +199,19 @@ export function usePhotoTriageController() {
   const moveToFolder = useCallback(async (folder: string, idsOverride?: string[]) => {
     const ids = idsOverride?.length ? idsOverride : uc.selectedOrCurrentIds()
     if (!ids.length) {
-      return { ok: false as const, reason: "empty" as const, count: 0 }
+      return { ok: false as const, reason: "empty" as const, count: 0, failed: 0 }
     }
-    const ok = await uc.moveItems(ids, folder)
-    return ok
-      ? { ok: true as const, reason: "ok" as const, count: ids.length }
-      : { ok: false as const, reason: "failed" as const, count: 0 }
+    const res = await uc.moveItems(ids, folder)
+    // count 用后端真正生效的条目数（不是点选的 ids.length），并把逐条失败数带出去，
+    // 调用方才能在 toast 里说清「N 项成功、M 项未移动」。
+    return res.ok
+      ? { ok: true as const, reason: "ok" as const, count: res.moved, failed: res.failed }
+      : {
+          ok: false as const,
+          reason: "failed" as const,
+          count: 0,
+          failed: res.failed || ids.length,
+        }
   }, [])
 
   return {

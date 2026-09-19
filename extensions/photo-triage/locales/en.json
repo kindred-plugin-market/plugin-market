@@ -61,6 +61,7 @@
       "folderEmptyHint": "（click ＋ on the right to add any folder; drag photos onto it to move）",
       "moveInto": "Move into {{path}}",
       "movedItems": "Moved {{count}} items into 📁 {{path}}",
+      "movedItemsWarn": "Moved {{count}} item(s) into 📁 {{path}}; {{count2}} item(s) were not moved",
       "moveConfirmTitle": "Confirm move",
       "moveConfirmDesc": "Move {{count}} item(s) into 📁 {{path}}?",
       "revealInFinder": "Reveal in Finder",

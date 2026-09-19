@@ -97,10 +97,13 @@ export function TriageHeader({
         <FolderOpen size={13} className="mr-1" />
         {t("photoTriage.reselect")}
       </Button>
-      <Button variant="ghost" size="sm" onClick={() => handleMarkAll("keep")}>
+      {/* 两个批量按钮会覆盖全部条目的现有标记，必须走下面的确认 Dialog（文案即
+          「已有标记会被覆盖」）：直调 handleMarkAll 时 setConfirmMark 从不被调用，
+          Dialog 永不打开，确认形同虚设。 */}
+      <Button variant="ghost" size="sm" onClick={() => setConfirmMark("keep")}>
         {t("photoTriage.markAllKeep")}
       </Button>
-      <Button variant="ghost" size="sm" onClick={() => handleMarkAll("drop")}>
+      <Button variant="ghost" size="sm" onClick={() => setConfirmMark("drop")}>
         {t("photoTriage.markAllDrop")}
       </Button>
       <Button variant="ghost" size="sm" onClick={handleExport} title={t("photoTriage.exportHint")}>

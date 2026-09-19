@@ -375,16 +375,26 @@ export function selectAllVisible(visible: PhotoItem[]) {
   s.setMulti(ids)
 }
 
-export async function moveItems(ids: string[], target: string): Promise<boolean> {
+/** 移动结果汇总：`moved` 只算后端真正生效的条目，`failed` 是逐条失败数。 */
+export interface MoveOutcome {
+  ok: boolean
+  moved: number
+  failed: number
+}
+
+export async function moveItems(ids: string[], target: string): Promise<MoveOutcome> {
   const store = usePhotoTriageStore.getState()
   const list = ids.filter(
     (id) => store.items.some((it) => it.id === id) && !store.deletedIds.includes(id),
   )
-  if (!list.length) return false
+  if (!list.length) return { ok: false, moved: 0, failed: 0 }
   try {
     const res = await repository.photoTriageMove(list, target)
     const updates: MoveUpdate[] = res.items ?? []
-    if (!updates.length) return false
+    // 后端逐条失败（已在目标夹 / 原文件不存在 / 条目没有文件）只体现在 res.errors，
+    // 丢掉就会把「10 项只移动了 3 项」报成全成功。
+    const failed = (res.errors ?? []).length
+    if (!updates.length) return { ok: false, moved: 0, failed: failed || list.length }
     const movedOut = store.applyMoveUpdates(updates)
     if (movedOut.length) {
       store.removeItems(movedOut)
@@ -393,9 +403,9 @@ export async function moveItems(ids: string[], target: string): Promise<boolean>
     store.bumpMovedCount(target, updates.length)
     persistState()
     persistFolders()
-    return true
+    return { ok: true, moved: updates.length, failed }
   } catch {
-    return false
+    return { ok: false, moved: 0, failed: list.length }
   }
 }
 

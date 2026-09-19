@@ -96,8 +96,10 @@
       },
       "toasts": {
         "created": "计费标准已创建",
+        "createdSkipped": "计费标准已创建，但有 {{skipped}} 行未填模型名、未保存",
         "createFailed": "创建计费标准失败",
         "updated": "计费标准已更新",
+        "updatedSkipped": "计费标准已更新，但有 {{skipped}} 行未填模型名、未保存",
         "updateFailed": "更新计费标准失败",
         "deleted": "计费标准已删除",
         "deleteFailed": "删除计费标准失败",
