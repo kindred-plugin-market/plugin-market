@@ -23,6 +23,17 @@
         }
       ]
     },
+    "extensions/douyin-content-assets": {
+      "release-type": "simple",
+      "component": "douyin-content-assets",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    },
     "extensions/hardware": {
       "release-type": "simple",
       "component": "hardware",
@@ -70,17 +81,6 @@
     "extensions/token-calculator": {
       "release-type": "simple",
       "component": "token-calculator",
-      "extra-files": [
-        {
-          "type": "json",
-          "path": "manifest.json",
-          "jsonpath": "$.version"
-        }
-      ]
-    },
-    "extensions/douyin-content-assets": {
-      "release-type": "simple",
-      "component": "douyin-content-assets",
       "extra-files": [
         {
           "type": "json",

@@ -39,7 +39,9 @@ permissions:
   actions: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # PR-close events use their own group; otherwise closing any PR on main can
+  # cancel the push run that creates the release PR.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
