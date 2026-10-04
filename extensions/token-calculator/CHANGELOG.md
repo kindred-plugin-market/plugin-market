@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/kindred-plugin-market/plugin-market/compare/token-calculator-v1.1.3...token-calculator-v1.1.4) (2026-10-04)
+
+
+### Bug Fixes
+
+* **extensions:** 清理/整理/术语插件的假成功回执与操作后视图跳走 ([#44](https://github.com/kindred-plugin-market/plugin-market/issues/44)) ([a7ef42f](https://github.com/kindred-plugin-market/plugin-market/commit/a7ef42fb9709616fb52f9b8df63ef6214317b2ed))
+
 ## [1.1.3](https://github.com/kindred-plugin-market/plugin-market/compare/token-calculator-v1.1.2...token-calculator-v1.1.3) (2026-09-16)
 
 

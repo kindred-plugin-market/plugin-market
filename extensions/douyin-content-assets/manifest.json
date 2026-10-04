@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "douyin-content-assets",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "display": {
     "zh": "抖音内容资产",
     "en": "Douyin Content Assets"
