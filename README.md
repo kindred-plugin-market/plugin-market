@@ -38,6 +38,10 @@ Tauri 命令 `browser_ext_export` 一键导出）。它经 Native Messaging
 4. 合并后 release-please 自动打 `<pluginId>-v<version>` tag 并创建 GitHub Release
    → 接力 `release.yml` 构建 zip、上传资产、把该版本 **upsert** 进 `registry.json` 并推回 `main`。
 
+插件的 `manifest.engines.bench` 必须设为包含其全部 `acl.commands` 的**首个已发布 Bench 版本**。
+检查正式版本 tag，而不是仅看功能提交时 `package.json` 中尚未发布的版本号。若已发布包的兼容下限写错，
+应撤回旧版本并发布新版本，不能覆盖既有 Release 资产。
+
 ### 一次前置设置（仓库 Settings）
 
 - General → 勾选 **Allow auto-merge**（workflow 会尝试用 API 自动开启；无 admin 权限时忽略并回退直接合并）
