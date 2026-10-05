@@ -29,7 +29,15 @@
         "resolving": "识别应用来源",
         "processing": "处理应用信息"
       },
-      "scanPartial": "部分应用来源扫描失败：{{providers}}。现有结果仍可继续使用。",
+      "scanPartial": "部分来源信息暂不可用：{{providers}}。应用列表仍可使用，相关来源和更新状态可能不完整。",
+      "providers": {
+        "filesystem": "应用目录",
+        "spotlight": "Spotlight",
+        "homebrew": "Homebrew",
+        "registry": "Windows 注册表",
+        "appsFolder": "Windows 应用列表",
+        "winget": "winget"
+      },
       "empty": "还没有扫描应用。去「应用管理」页面先扫描一次，或者点击下方按钮直接扫描。",
       "totalApps": "{{count}} 个应用 · {{scenes}} 个场景",
       "searchResult": "搜索到 {{count}} 个应用",

@@ -30,7 +30,16 @@
  */
 
 import { spawnSync } from "node:child_process"
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
@@ -96,7 +105,11 @@ function removeSandbox(sandbox) {
   } catch (error) {
     const fallback = spawnSync(
       process.execPath,
-      ["-e", "require('node:fs').rmSync(process.argv[1], { recursive: true, force: true })", sandbox],
+      [
+        "-e",
+        "require('node:fs').rmSync(process.argv[1], { recursive: true, force: true })",
+        sandbox,
+      ],
       { stdio: "ignore", env: { ...process.env, NODE_OPTIONS: "" } },
     )
     if (fallback.status !== 0 || existsSync(sandbox)) {
@@ -130,7 +143,11 @@ function main() {
     )
   }
   if (!existsSync(join(host, "package.json"))) {
-    fail("BENCH_HOST_MISSING", `${host} is not a Bench host checkout`, "Pass --host <dir> or set BENCH_HOST_DIR.")
+    fail(
+      "BENCH_HOST_MISSING",
+      `${host} is not a Bench host checkout`,
+      "Pass --host <dir> or set BENCH_HOST_DIR.",
+    )
   }
   if (!existsSync(EXTENSIONS_DIR)) {
     fail("EXTENSION_MARKET_MISSING", `${EXTENSIONS_DIR} does not exist`)
@@ -154,11 +171,19 @@ function main() {
     )
   }
   if (onlyId && !expected.includes(onlyId)) {
-    fail("EXTENSION_NOT_FOUND", `plugin "${onlyId}" has no manifest.json`, `Discovered: ${expected.join(", ")}`)
+    fail(
+      "EXTENSION_NOT_FOUND",
+      `plugin "${onlyId}" has no manifest.json`,
+      `Discovered: ${expected.join(", ")}`,
+    )
   }
 
   const targets = onlyId ? [onlyId] : expected
-  const sandbox = mkdtempSync(join(host, "node_modules", SANDBOX_PREFIX))
+  // Worktrees may expose the primary checkout's node_modules through a
+  // symlink. Canonicalize it before creating the sandbox so Vite's root and
+  // the setup-file paths agree on the physical location.
+  const hostNodeModules = realpathSync(join(host, "node_modules"))
+  const sandbox = mkdtempSync(join(hostNodeModules, SANDBOX_PREFIX))
   const tested = []
   const failed = []
 
@@ -172,7 +197,7 @@ function main() {
         "import react from '@vitejs/plugin-react'",
         "// 由 scripts/test-extensions.mjs 生成（一次性沙箱内，运行后随沙箱删除）。",
         "export default {",
-        `  root: ${JSON.stringify(host)},`,
+        `  root: ${JSON.stringify(sandbox)},`,
         "  plugins: [react()],",
         "  resolve: { alias: {",
         `    '@/i18n/config': ${JSON.stringify(join(pluginSrc, "i18n.ts"))},`,
@@ -188,6 +213,7 @@ function main() {
         `    include: [${JSON.stringify(join(pluginSrc, "**", "*.{test,spec}.{ts,tsx}"))}],`,
         "    css: false,",
         "  },",
+        `  server: { fs: { allow: [${JSON.stringify(sandbox)}, ${JSON.stringify(hostNodeModules)}] } },`,
         "}",
         "",
       ].join("\n")

@@ -1,6 +1,33 @@
 import { defineConfig } from "vite"
+import type { Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
+
+function quickLaunchCssGuard(): Plugin {
+  return {
+    name: "quick-launch-css-contract",
+    apply: "build",
+    generateBundle(_options, bundle) {
+      const css = Object.values(bundle)
+        .filter((asset) => asset.type === "asset" && asset.fileName.endsWith(".css"))
+        .map((asset) =>
+          typeof asset.source === "string"
+            ? asset.source
+            : new TextDecoder().decode(asset.source),
+        )
+        .join("\n")
+      const required = [
+        "grid-template-columns:repeat(4,minmax(0,1fr))",
+        "height:min(60vh,720px)",
+        "min-height:240px",
+      ]
+      const missing = required.filter((declaration) => !css.includes(declaration))
+      if (missing.length > 0) {
+        this.error(`Quick Launch CSS is missing required layout rules: ${missing.join(", ")}`)
+      }
+    },
+  }
+}
 
 /**
  * quick-launch 插件独立构建（从 Bench 内置功能迁移，D 系列）。
@@ -13,7 +40,7 @@ import path from "path"
 export default defineConfig({
   root: import.meta.dirname,
   base: "./",
-  plugins: [react()],
+  plugins: [react(), quickLaunchCssGuard()],
   resolve: {
     alias: {
       // ⚠️ 顺序铁律：vite alias 按声明顺序匹配，"@" 是前缀规则（"@" + "/"），
