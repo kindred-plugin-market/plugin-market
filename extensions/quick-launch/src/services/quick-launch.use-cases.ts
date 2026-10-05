@@ -3,19 +3,27 @@
  *
  * 场景自动分类、用户覆盖应用、导出分类结果等业务编排。
  */
-import type { AppInfo } from "@/lib/tauri/types/app-manager"
+import type { AppInfo, ProviderStatus } from "@/lib/tauri/types/app-manager"
 import {
   classifyInventory,
   createEmptyClassification,
+  hasVisibleAppName,
 } from "@extension/classification-engine"
-import type {
-  LaunchSceneKey,
-  OverrideEntry,
-  FullClassificationEntry,
-} from "@extension/types"
+import type { LaunchSceneKey, OverrideEntry, FullClassificationEntry } from "@extension/types"
 
 export function autoClassifyApps(apps: AppInfo[]): Record<LaunchSceneKey, string[]> {
   return classifyInventory(apps).scenes
+}
+
+export function incompleteInventoryProviders(providers: ProviderStatus[]): string[] {
+  return providers
+    .filter(
+      (provider) =>
+        provider.state === "partial" ||
+        provider.state === "failed" ||
+        provider.state === "timedOut",
+    )
+    .map((provider) => provider.provider)
 }
 
 export function applyOverrides(
@@ -28,7 +36,8 @@ export function applyOverrides(
     result[key] = [...classified[key]]
   }
   for (const [appId, targetScene] of Object.entries(overrides)) {
-    if (!appMap.has(appId)) continue
+    const app = appMap.get(appId)
+    if (!app || !app.allowedActions.launch || !hasVisibleAppName(app.name)) continue
     for (const key of Object.keys(result) as LaunchSceneKey[]) {
       result[key] = result[key].filter((id) => id !== appId)
     }

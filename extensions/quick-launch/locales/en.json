@@ -29,7 +29,15 @@
         "resolving": "Resolving sources",
         "processing": "Processing metadata"
       },
-      "scanPartial": "Some application sources could not be scanned: {{providers}}. Existing results remain available.",
+      "scanPartial": "Some source details are temporarily unavailable: {{providers}}. The app list remains usable, but source and update details may be incomplete.",
+      "providers": {
+        "filesystem": "application directories",
+        "spotlight": "Spotlight",
+        "homebrew": "Homebrew",
+        "registry": "Windows registry",
+        "appsFolder": "Windows app list",
+        "winget": "winget"
+      },
       "empty": "No scanned apps yet. Go to App Manager to scan first, or click below.",
       "totalApps": "{{count}} apps · {{scenes}} scenes",
       "searchResult": "{{count}} apps found",

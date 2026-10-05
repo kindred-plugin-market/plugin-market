@@ -3,12 +3,13 @@
  */
 import React from "react"
 import { createRoot } from "react-dom/client"
+import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 import type { ComponentType } from "react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
 
-import "@/styles/index.css"
+import "@extension/styles.css"
 import "@extension/i18n"
 import Page from "@extension/page"
 
@@ -21,10 +22,12 @@ if (container) {
     <React.StrictMode>
       {/* 宿主 main.tsx 在根节点提供 TooltipProvider；插件是独立 React 应用，
           必须自带 —— 否则任何 Tooltip 都会抛 “must be used within TooltipProvider”（白屏）。 */}
-      <TooltipProvider>
-        <PluginPage active={true} />
-        <Toaster position="top-center" />
-      </TooltipProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TooltipProvider>
+          <PluginPage active={true} />
+          <Toaster position="top-center" />
+        </TooltipProvider>
+      </ThemeProvider>
     </React.StrictMode>,
   )
 }
