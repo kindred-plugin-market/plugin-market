@@ -113,6 +113,13 @@ function HardwareCompare<T extends { id: string; model: string }>({
             onToggleModel={(id) => toggleModel(scope, id)}
             onClearSelected={() => clearSelectedModels(scope)}
             i18nPrefix={i18nPrefix}
+            filterTitleKey="hardwareCompare.filters"
+            clearFiltersKey="hardwareCompare.clearFilters"
+            filteredCountKey="hardwareCompare.filteredCount"
+            autoExpandHintKey="hardwareCompare.autoExpandHint"
+            pinnedHintKey="hardwareCompare.pinnedHint"
+            clearSelectedKey="hardwareCompare.clearSelected"
+            noModelsKey="hardwareCompare.noModelsSelected"
             uid={uid}
           />
         )}
