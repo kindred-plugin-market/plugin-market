@@ -5,7 +5,7 @@ import { lazy, Suspense } from "react"
 import { useTranslation } from "react-i18next"
 import { AnimatePresence, motion } from "motion/react"
 
-import { SoftwareUpdateLoadingSkeleton } from "@extension/components/SoftwareUpdateView"
+import { SoftwareUpdateLoadingSkeleton } from "@extension/components/SoftwareUpdateLoadingSkeleton"
 
 const SoftwareUpdateView = lazy(() =>
   import("@extension/components/SoftwareUpdateView").then((m) => ({
@@ -374,6 +374,8 @@ function AppManager({ active, feature }: { active: boolean; feature?: { desktopO
                         onAuthorize={handleAuthorizeFromColumn}
                         onUpgrade={handleDetailUpgrade}
                         onUninstall={handleDetailUninstall}
+                        operationStatus={viewState.operations[app.appId]?.status ?? "idle"}
+                        onCancelOperation={() => controller.cancelAppOperation(app.appId)}
                       />
                     )}
                     selectedItem={selectedItem}

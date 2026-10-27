@@ -55,6 +55,7 @@ export function useAppManagerController(active: boolean) {
     sorting,
     scanned,
     result,
+    operations,
     confirmDialog,
     lastScanTime,
     lastUpdateCheck,
@@ -305,11 +306,16 @@ export function useAppManagerController(active: boolean) {
       const outcome = await appManagerUseCases.runAppOperation({ appId, kind: "upgrade" })
       if (!outcome) return
 
+      const completedState = toOperationState(outcome.result)
       useAppManagerStore.setState((state) => ({
-        operations: { ...state.operations, [appId]: toOperationState(outcome.result) },
+        operations: { ...state.operations, [appId]: completedState },
       }))
       if (outcome.result.success) {
-        scheduleTimeout(() => setOperationStatus(appId, "idle"), 5000)
+        scheduleTimeout(() => {
+          if (useAppManagerStore.getState().operations[appId] === completedState) {
+            setOperationStatus(appId, "idle")
+          }
+        }, 5000)
       }
 
       if (outcome.shouldRescan) void scanApps()
@@ -332,8 +338,9 @@ export function useAppManagerController(active: boolean) {
       const outcome = await appManagerUseCases.runAppOperation({ appId, kind: "uninstall" })
       if (!outcome) return
 
+      const completedState = toOperationState(outcome.result)
       useAppManagerStore.setState((state) => ({
-        operations: { ...state.operations, [appId]: toOperationState(outcome.result) },
+        operations: { ...state.operations, [appId]: completedState },
       }))
       if (outcome.shouldRescan) {
         scheduleScanApps(800)
@@ -341,6 +348,22 @@ export function useAppManagerController(active: boolean) {
     },
     [scheduleScanApps, t],
   )
+
+  const cancelAppOperation = useCallback(async (appId: string) => {
+    const { operations, setOperationStatus } = useAppManagerStore.getState()
+    const current = operations[appId]
+    if (current?.status !== "running") return
+
+    setOperationStatus(appId, "cancelling", current.message)
+    try {
+      await appManagerUseCases.cancelAppOperation(appId)
+    } catch (error) {
+      if (useAppManagerStore.getState().operations[appId]?.status === "cancelling") {
+        setOperationStatus(appId, "running", current.message)
+      }
+      toast.error(getErrorMessage(error))
+    }
+  }, [])
 
   const doInstall = useCallback(
     async (
@@ -541,10 +564,10 @@ export function useAppManagerController(active: boolean) {
     clearSelection,
   ])
 
-  const getOpStatus = useCallback((appId: string) => {
-    const state = useAppManagerStore.getState()
-    return state.operations[appId]?.status ?? "idle"
-  }, [])
+  const getOpStatus = useCallback(
+    (appId: string) => operations[appId]?.status ?? "idle",
+    [operations],
+  )
 
   const filteredApps = useMemo(
     () =>
@@ -696,6 +719,8 @@ export function useAppManagerController(active: boolean) {
           if (!appId) return null
           const app = apps.find((item) => item.appId === appId)
           if (!app) return null
+          const operationStatus = operations[appId]?.status ?? "idle"
+          const operationRunning = isOperationRunning(operations, appId)
           return {
             id: "app-manager-menu",
             items: [
@@ -729,6 +754,7 @@ export function useAppManagerController(active: boolean) {
                       id: "upgrade",
                       label: t("appManager.actionUpgrade"),
                       icon: undefined,
+                      disabled: operationRunning,
                       onClick: () => handleUpgradeFromColumn(app),
                     },
                   ]
@@ -739,8 +765,24 @@ export function useAppManagerController(active: boolean) {
                       id: "uninstall",
                       label: t("appManager.actionUninstall"),
                       icon: undefined,
+                      disabled: operationRunning,
                       destructive: true,
                       onClick: () => handleUninstallFromColumn(app),
+                    },
+                  ]
+                : []),
+              ...(operationRunning
+                ? [
+                    {
+                      id: "cancel-operation",
+                      label: t(
+                        operationStatus === "cancelling"
+                          ? "appManager.operation.cancelling"
+                          : "appManager.operation.cancel",
+                      ),
+                      icon: undefined,
+                      disabled: operationStatus === "cancelling",
+                      onClick: () => cancelAppOperation(appId),
                     },
                   ]
                 : []),
@@ -750,12 +792,14 @@ export function useAppManagerController(active: boolean) {
       }) satisfies ContextMenuRegistration,
     [
       apps,
+      operations,
       t,
       handleLaunch,
       handleReveal,
       handleAuthorizeFromColumn,
       handleUpgradeFromColumn,
       handleUninstallFromColumn,
+      cancelAppOperation,
     ],
   )
 
@@ -1043,6 +1087,7 @@ export function useAppManagerController(active: boolean) {
         handleReveal,
         handleUpgradeFromColumn,
         handleUninstallFromColumn,
+        (app) => cancelAppOperation(app.appId),
       ),
     [
       t,
@@ -1051,6 +1096,7 @@ export function useAppManagerController(active: boolean) {
       handleReveal,
       handleUpgradeFromColumn,
       handleUninstallFromColumn,
+      cancelAppOperation,
     ],
   )
 
@@ -1210,6 +1256,8 @@ export function useAppManagerController(active: boolean) {
     handleAuthorizeConfirm,
     handleUpgradeFromColumn,
     handleUninstallFromColumn,
+    cancelAppOperation,
+    getOpStatus,
     handleInstall,
     toggleInstallSelect,
     clearInstallSelection,

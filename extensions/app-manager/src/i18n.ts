@@ -8,7 +8,9 @@ import en from "../locales/en.json"
 import zh from "../locales/zh.json"
 
 const injected =
-  typeof window !== "undefined" && (window as { __BENCH_EXT_LOCALE?: string }).__BENCH_EXT_LOCALE
+  typeof window === "undefined"
+    ? undefined
+    : (window as { __BENCH_EXT_LOCALE?: string }).__BENCH_EXT_LOCALE
 const preferred =
   injected ??
   (typeof navigator !== "undefined" && navigator.language.startsWith("zh") ? "zh" : "en")

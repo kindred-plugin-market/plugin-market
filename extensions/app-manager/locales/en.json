@@ -139,6 +139,8 @@
       "install": "Install",
       "installing": "Installing...",
       "operation": {
+        "cancel": "Cancel operation",
+        "cancelling": "Cancelling operation...",
         "upgrading": "Upgrading...",
         "uninstalling": "Uninstalling...",
         "installing": "Installing..."
