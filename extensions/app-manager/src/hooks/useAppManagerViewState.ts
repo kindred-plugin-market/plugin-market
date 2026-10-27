@@ -24,6 +24,7 @@ export function useAppManagerViewState() {
       sorting: store.sorting,
       scanned: store.scanned,
       result: store.result,
+      operations: store.operations,
       confirmDialog: store.confirmDialog,
       lastScanTime: store.lastScanTime,
       lastUpdateCheck: store.lastUpdateCheck,

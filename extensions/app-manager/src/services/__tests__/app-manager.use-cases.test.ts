@@ -26,6 +26,7 @@ const createRepository = (overrides: Partial<AppManagerRepository> = {}): AppMan
   batchUpgradeApps: vi.fn(),
   batchUninstallApps: vi.fn(),
   installApp: vi.fn(),
+  cancelAppUpdate: vi.fn(),
   cancelBatchOperation: vi.fn(),
   checkAllAppUpdates: vi.fn(),
   openInMacAppStore: vi.fn(),
@@ -68,6 +69,15 @@ describe("appManagerUseCases", () => {
       shouldRescan: false,
       result: { success: false, message: "boom" },
     })
+  })
+
+  it("routes a single-operation cancellation to the app manager command", async () => {
+    const repository = createRepository({ cancelAppUpdate: vi.fn().mockResolvedValue(undefined) })
+    const useCases = createAppManagerUseCases(repository, () => true)
+
+    await useCases.cancelAppOperation("app-1")
+
+    expect(repository.cancelAppUpdate).toHaveBeenCalledWith("app-1")
   })
 
   it("routes install operations through the install repository command", async () => {

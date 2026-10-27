@@ -139,6 +139,8 @@
       "install": "安装",
       "installing": "安装中...",
       "operation": {
+        "cancel": "取消操作",
+        "cancelling": "正在取消操作...",
         "upgrading": "升级中...",
         "uninstalling": "卸载中...",
         "installing": "安装中..."

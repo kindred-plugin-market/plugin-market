@@ -171,6 +171,10 @@ function createAppManagerUseCases(
       }
     },
 
+    cancelAppOperation(appId: string): Promise<void> {
+      return repository.cancelAppUpdate(appId)
+    },
+
     async checkAllAppUpdates(
       forceRefresh = false,
     ): Promise<{ report?: UpdateScanReport; updates: UpdateInfo[]; error: string | null }> {
