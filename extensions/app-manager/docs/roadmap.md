@@ -8,6 +8,7 @@
 - [x] Windows fixture 覆盖 EXE 安装路径、MSI ProductCode、AUMID、32/64 位注册表、CJK 与带空格路径；由 Windows CI 运行解析与契约测试。
 - [x] App inventory 的 Homebrew 元数据读取禁止自动更新，避免扫描应用时触发隐式网络刷新并挤占命令超时。
 - [x] macOS 27.0.1 arm64 真机：扫描 449 项、搜索 TextEdit、由 App Manager 启动 TextEdit、Finder reveal 到系统应用位置；全程未执行升级或卸载。
+- [x] 单包升级/卸载取消：插件 23 项自动化覆盖状态订阅、取消失败恢复、取消结果清理和 stale timer 防护；2026-10-16 macOS 隔离 QA bundle 分别验证升级与卸载的 UI→IPC→确定性子进程终止→idle 全链路，未对真实应用执行升级或卸载。Windows 取消与进程树回收仍待用户提供环境。
 - [ ] macOS 真机 smoke：临时签名身份拒绝、ZIP/DMG 取消与安装 journal 恢复。
 - [ ] Windows 真机 smoke：EXE/AUMID 启动、图标、winget/MSI timeout、进程树回收、取消和权限拒绝。用户安排稍后提供 Windows 环境，本轮暂不验证。
 - [ ] R02 的 0/1/50/500/2000 应用规模自动化门槛已覆盖；仍需记录 500/2000 项真机搜索耗时、滚动、按需图标请求、刷新保留旧快照与取消结果，见 [Quick Launch roadmap](../../quick-launch/docs/roadmap.md)。

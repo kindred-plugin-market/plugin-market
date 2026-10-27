@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StickyTableText } from "@/components/ui/StickyTable"
 import { AppIcon } from "@extension/components/AppIcon"
+import { OperationCancelButton } from "@extension/components/OperationCancelButton"
 import type { AppInfo } from "@/lib/tauri/types"
 import type { OperationStatus } from "@extension/store"
 import { appManagerPlatformConfig } from "@/platform/config"
@@ -106,6 +107,7 @@ function sourceTypeLabel(t: TFunction, sourceType: string): string {
 function OperationStatusIcon({ status }: { status: OperationStatus }) {
   switch (status) {
     case "running":
+    case "cancelling":
       return <Loader2 size={13} className="animate-spin text-blue-500" />
     case "success":
       return <CheckCircle2 size={13} className="text-green-500" />
@@ -123,6 +125,7 @@ export function createAppManagerColumns(
   onReveal: (app: AppInfo) => void,
   onUpgrade: (app: AppInfo) => void,
   onUninstall: (app: AppInfo) => void,
+  onCancelOperation: (app: AppInfo) => void,
 ): ColumnDef<BenchTableFeatures, AppInfo>[] {
   return [
     {
@@ -252,6 +255,7 @@ export function createAppManagerColumns(
       cell: ({ row }) => {
         const app = row.original
         const opStatus = getOpStatus(app.appId)
+        const operationRunning = opStatus === "running" || opStatus === "cancelling"
 
         return (
           <div
@@ -289,7 +293,7 @@ export function createAppManagerColumns(
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              disabled={!app.allowedActions.upgrade || opStatus === "running"}
+              disabled={!app.allowedActions.upgrade || operationRunning}
               title={
                 app.upgradeAvailable
                   ? t("appManager.actionUpgradeAvailable")
@@ -302,7 +306,7 @@ export function createAppManagerColumns(
               }
               onClick={() => onUpgrade(app)}
             >
-              {opStatus === "running" && app.canUpgrade ? (
+              {operationRunning && app.canUpgrade ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
                 <ArrowUpCircle
@@ -317,7 +321,7 @@ export function createAppManagerColumns(
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              disabled={!app.allowedActions.uninstall || opStatus === "running"}
+              disabled={!app.allowedActions.uninstall || operationRunning}
               title={
                 app.isSystemApp
                   ? t("appManager.actionUninstallSystemBlocked")
@@ -336,12 +340,18 @@ export function createAppManagerColumns(
             >
               {!app.allowedActions.uninstall ? (
                 <ShieldAlert size={14} className="text-muted-foreground/40" />
-              ) : opStatus === "running" ? (
+              ) : operationRunning ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
                 <Trash2 size={14} />
               )}
             </Button>
+
+            <OperationCancelButton
+              status={opStatus}
+              compact
+              onCancel={() => onCancelOperation(app)}
+            />
 
             {/* Operation status indicator */}
             <OperationStatusIcon status={opStatus} />

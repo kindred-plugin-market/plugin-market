@@ -18,6 +18,8 @@ import { DetailSection, MetadataRow } from "@/components/layout/DetailPanel"
 import { AppIcon } from "@extension/components/AppIcon"
 import { getInstallSourceLabel } from "@extension/components/InstallSourceBadges"
 import { canAuthorizeMacApp } from "@extension/model/authorize-app"
+import { OperationCancelButton } from "@extension/components/OperationCancelButton"
+import type { OperationStatus } from "@extension/model/operations"
 import { appManagerPlatformConfig } from "@/platform/config"
 import type { AppInfo, InstallListAppInfo } from "@/lib/tauri/types/app-manager"
 
@@ -28,6 +30,8 @@ interface AppDetailProps {
   onAuthorize: (app: AppInfo) => void
   onUpgrade: () => void
   onUninstall: () => void
+  operationStatus: OperationStatus
+  onCancelOperation: () => void
 }
 
 export function AppDetail({
@@ -37,9 +41,12 @@ export function AppDetail({
   onAuthorize,
   onUpgrade,
   onUninstall,
+  operationStatus,
+  onCancelOperation,
 }: AppDetailProps) {
   const { t } = useTranslation()
   const showAuthorize = canAuthorizeMacApp(app)
+  const operationRunning = operationStatus === "running" || operationStatus === "cancelling"
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -92,17 +99,24 @@ export function AppDetail({
             </Button>
           )}
           {app.allowedActions.upgrade && (
-            <Button size="sm" variant="outline" onClick={onUpgrade}>
+            <Button size="sm" variant="outline" disabled={operationRunning} onClick={onUpgrade}>
               <ArrowUpCircle size={13} className="mr-1" />
               {t("appManager.actionUpgrade")}
             </Button>
           )}
           {app.allowedActions.uninstall && (
-            <Button size="sm" variant="outline" className="text-red-600" onClick={onUninstall}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-red-600"
+              disabled={operationRunning}
+              onClick={onUninstall}
+            >
               <Trash2 size={13} className="mr-1" />
               {t("appManager.actionUninstall")}
             </Button>
           )}
+          <OperationCancelButton status={operationStatus} onCancel={onCancelOperation} />
         </div>
       </DetailSection>
     </div>

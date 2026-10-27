@@ -5,7 +5,7 @@ import type { BatchOperationResult, OperationResult } from "@/lib/tauri/types/ap
 import type { LocalizedError } from "@/lib/errors"
 import { getErrorMessage } from "@/lib/tauri/errors"
 
-export type OperationStatus = "idle" | "pending" | "running" | "success" | "error"
+export type OperationStatus = "idle" | "pending" | "running" | "cancelling" | "success" | "error"
 
 export interface AppOperationState {
   status: OperationStatus
@@ -22,10 +22,15 @@ export function isOperationRunning(
   operations: Record<string, AppOperationState>,
   appId: string,
 ): boolean {
-  return operations[appId]?.status === "running"
+  const status = operations[appId]?.status
+  return status === "running" || status === "cancelling"
 }
 
 export function toOperationState(result: OperationResult): AppOperationState {
+  if (result.errorCode === "OPERATION_CANCELLED") {
+    return { status: "idle", message: "" }
+  }
+
   return {
     status: result.success ? "success" : "error",
     message: result.message,

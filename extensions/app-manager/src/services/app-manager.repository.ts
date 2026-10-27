@@ -4,6 +4,7 @@
 import {
   batchUninstallApps,
   batchUpgradeApps,
+  cancelAppUpdate,
   cancelBatchOperation,
   checkAllAppUpdates,
   checkManagedAppUpdates,
@@ -37,6 +38,7 @@ export const appManagerRepository = {
   batchUpgradeApps,
   batchUninstallApps,
   installApp,
+  cancelAppUpdate,
   cancelBatchOperation,
   checkAllAppUpdates,
   openInMacAppStore,
