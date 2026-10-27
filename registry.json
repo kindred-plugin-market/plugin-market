@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-04T10:36:43Z",
+  "updatedAt": "2026-10-27T17:45:16Z",
   "extensions": [
     {
       "id": "app-manager",
@@ -16,6 +16,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.1.0",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/app-manager-v1.1.0/bench-ext-app-manager-v1.1.0.zip",
+          "sha256": "b727e15d57477e070e93ba8621e903a8b4f4fea09d7155ca929183082d51562d",
+          "size": 278923,
+          "publishedAt": "2026-10-27T17:45:14Z",
+          "yanked": false
+        },
         {
           "version": "1.0.3",
           "engines": {
@@ -164,6 +175,17 @@
       },
       "versions": [
         {
+          "version": "1.0.3",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/hardware-v1.0.3/bench-ext-hardware-v1.0.3.zip",
+          "sha256": "9c30840e61558b6a829b7f8956643860fa1bbf90902620eb41c4561d45202f29",
+          "size": 261282,
+          "publishedAt": "2026-10-27T17:45:15Z",
+          "yanked": false
+        },
+        {
           "version": "1.0.2",
           "engines": {
             "bench": ">=1.30.0"
@@ -272,6 +294,17 @@
         "name": "Kindred Plugin Market"
       },
       "versions": [
+        {
+          "version": "1.1.0",
+          "engines": {
+            "bench": ">=1.30.0"
+          },
+          "downloadUrl": "https://github.com/kindred-plugin-market/plugin-market/releases/download/quick-launch-v1.1.0/bench-ext-quick-launch-v1.1.0.zip",
+          "sha256": "3d9e9a2b85a91058ec67757b82ad775b56f40837db01f93a05753914e2388b3e",
+          "size": 235378,
+          "publishedAt": "2026-10-27T17:45:16Z",
+          "yanked": false
+        },
         {
           "version": "1.0.4",
           "engines": {
