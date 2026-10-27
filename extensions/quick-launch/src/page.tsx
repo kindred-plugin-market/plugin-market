@@ -6,7 +6,7 @@
  *
  * 「常用应用」场景使用 Tab 折叠: AI 编程 / AI 助手 / AI 办公 / AI 模型 / 开发 / 系统工具
  */
-import { forwardRef, useState } from "react"
+import { forwardRef, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "motion/react"
 import {
@@ -46,6 +46,10 @@ import type { AppFeature } from "@/features/types"
 import type { AppInfo } from "@/lib/tauri/types/app-manager"
 import type { LaunchSceneKey } from "@extension/types"
 import { AppIcon } from "@extension/components/AppIcon"
+import {
+  QuickLaunchVirtualGrid,
+  shouldVirtualizeQuickLaunchApps,
+} from "@extension/components/QuickLaunchVirtualGrid"
 import {
   useQuickLaunchController,
   MERGED_SCENE_KEYS,
@@ -95,10 +99,45 @@ function formatLastModified(
   return t("quickLaunch.time.monthsAgo", { months: Math.floor(days / 30) })
 }
 
+function createAppDisplayNames(apps: AppInfo[]): Map<string, string> {
+  const counts = new Map<string, number>()
+  const bundleCounts = new Map<string, number>()
+  const normalize = (value: string) =>
+    value
+      .replace(/\p{Cf}/gu, "")
+      .trim()
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+
+  for (const app of apps) {
+    const key = normalize(app.name)
+    if (!key) continue
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+    const bundleKey = `${key}\u0000${app.bundleId}`
+    bundleCounts.set(bundleKey, (bundleCounts.get(bundleKey) ?? 0) + 1)
+  }
+
+  return new Map<string, string>(
+    apps.map((app): [string, string] => {
+      const key = normalize(app.name)
+      if ((counts.get(key) ?? 0) <= 1) return [app.appId, app.name]
+
+      const bundleKey = `${key}\u0000${app.bundleId}`
+      const identifier = app.bundleId || app.appId.slice(-6)
+      const suffix =
+        (bundleCounts.get(bundleKey) ?? 0) > 1 && app.bundleId
+          ? `${identifier} · ${app.appId.slice(-6)}`
+          : identifier
+      return [app.appId, `${app.name} · ${suffix}`]
+    }),
+  )
+}
+
 const AppCard = forwardRef<
   HTMLButtonElement,
   {
     app: AppInfo
+    displayName?: string
     onLaunch: (app: AppInfo) => void
     onReveal: (app: AppInfo) => void
     isEditMode?: boolean
@@ -107,7 +146,16 @@ const AppCard = forwardRef<
     animated?: boolean
   }
 >(function AppCard(
-  { app, onLaunch, onReveal, isEditMode, sceneLabel, onContextMenuEdit, animated = true },
+  {
+    app,
+    displayName = app.name,
+    onLaunch,
+    onReveal,
+    isEditMode,
+    sceneLabel,
+    onContextMenuEdit,
+    animated = true,
+  },
   ref,
 ) {
   const { t } = useTranslation()
@@ -138,7 +186,7 @@ const AppCard = forwardRef<
         "group bg-card hover:border-primary/40 hover:bg-accent/30 relative flex h-full w-full cursor-pointer flex-col items-center gap-2 rounded-xl border p-3 transition hover:shadow-sm",
         isEditMode ? "border-primary/40 ring-primary/20 ring-1" : "border-border",
       )}
-      aria-label={app.allowedActions.launch ? app.name : t("quickLaunch.notLaunchable")}
+      aria-label={app.allowedActions.launch ? displayName : t("quickLaunch.notLaunchable")}
       disabled={!app.allowedActions.launch}
     >
       <div className="bg-muted/50 flex size-12 shrink-0 items-center justify-center rounded-xl">
@@ -149,8 +197,11 @@ const AppCard = forwardRef<
           className="rounded-lg object-contain"
         />
       </div>
-      <span className="text-foreground w-full truncate text-center text-xs leading-tight font-medium">
-        {app.name}
+      <span
+        className="text-foreground w-full truncate text-center text-xs leading-tight font-medium"
+        title={displayName}
+      >
+        {displayName}
       </span>
       {isEditMode && sceneLabel && (
         <span
@@ -186,6 +237,7 @@ const AppCard = forwardRef<
 function SceneSection({
   scene,
   apps,
+  displayNames,
   expanded,
   onToggle,
   onLaunch,
@@ -196,6 +248,7 @@ function SceneSection({
 }: {
   scene: (typeof LAUNCH_SCENES)[number]
   apps: AppInfo[]
+  displayNames: Map<string, string>
   expanded: boolean
   onToggle: () => void
   onLaunch: (app: AppInfo) => void
@@ -229,15 +282,13 @@ function SceneSection({
           <ChevronDown size={14} />
         </motion.span>
       </div>
-      {expanded && apps.length > 48 ? (
-        // 大分类（如「其他」）：用普通网格交给页面滚动，保证分类表头能随页面吸顶，
-        // 不再用内部固定高度的虚拟滚动盒子（那样表头吸不住、且观感像被锁死高度）。
-        // animated=false 关闭 framer-motion 布局动画，避免大列表重排卡顿。
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
-          {apps.map((app) => (
+      {shouldVirtualizeQuickLaunchApps(apps.length, expanded) ? (
+        <QuickLaunchVirtualGrid
+          apps={apps}
+          renderCard={(app) => (
             <AppCard
-              key={app.appId}
               app={app}
+              displayName={displayNames.get(app.appId)}
               onLaunch={onLaunch}
               onReveal={onReveal}
               isEditMode={isEditMode}
@@ -249,8 +300,8 @@ function SceneSection({
               onContextMenuEdit={onContextMenuEdit}
               animated={false}
             />
-          ))}
-        </div>
+          )}
+        />
       ) : (
         <motion.div
           layout={shouldReduceMotion ? false : "position"}
@@ -262,6 +313,7 @@ function SceneSection({
               <AppCard
                 key={app.appId}
                 app={app}
+                displayName={displayNames.get(app.appId)}
                 onLaunch={onLaunch}
                 onReveal={onReveal}
                 isEditMode={isEditMode}
@@ -299,6 +351,7 @@ function SceneSection({
 /** 合并 Tabbed Section — 将多个场景合并为一个带 Tab 的「常用应用」区域 */
 function MergedSceneSection({
   sceneApps,
+  displayNames,
   onLaunch,
   onReveal,
   isEditMode,
@@ -306,6 +359,7 @@ function MergedSceneSection({
   onContextMenuEdit,
 }: {
   sceneApps: Record<LaunchSceneKey, AppInfo[]>
+  displayNames: Map<string, string>
   onLaunch: (app: AppInfo) => void
   onReveal: (app: AppInfo) => void
   isEditMode: boolean
@@ -360,13 +414,13 @@ function MergedSceneSection({
       </div>
 
       {/* App cards grid */}
-      {currentApps.length > 48 ? (
-        // 大分类：随页面滚动的普通网格，保证「常用应用」表头可吸顶；animated=false 避免大列表重排卡顿。
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
-          {currentApps.map((app) => (
+      {shouldVirtualizeQuickLaunchApps(currentApps.length, true) ? (
+        <QuickLaunchVirtualGrid
+          apps={currentApps}
+          renderCard={(app) => (
             <AppCard
-              key={app.appId}
               app={app}
+              displayName={displayNames.get(app.appId)}
               onLaunch={onLaunch}
               onReveal={onReveal}
               isEditMode={isEditMode}
@@ -378,8 +432,8 @@ function MergedSceneSection({
               onContextMenuEdit={onContextMenuEdit}
               animated={false}
             />
-          ))}
-        </div>
+          )}
+        />
       ) : (
         <AnimatePresence mode="popLayout">
           <motion.div
@@ -394,6 +448,7 @@ function MergedSceneSection({
               <AppCard
                 key={app.appId}
                 app={app}
+                displayName={displayNames.get(app.appId)}
                 onLaunch={onLaunch}
                 onReveal={onReveal}
                 isEditMode={isEditMode}
@@ -498,6 +553,7 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
     appManagerScanProgress,
     hydrating,
     inventoryError,
+    inventoryPartial,
     sceneOrder,
     expandedScenes,
     searchQuery,
@@ -527,6 +583,8 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
     handleRescan,
     handleCancelScan,
   } = useQuickLaunchController(active)
+
+  const displayNames = useMemo(() => createAppDisplayNames(appManagerApps), [appManagerApps])
 
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
 
@@ -569,8 +627,16 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden">
       {inventoryError && (
-        <Alert variant="destructive" className="shrink-0">
-          <AlertDescription className="flex items-center justify-between gap-3">
+        <Alert
+          variant={inventoryPartial ? "default" : "destructive"}
+          className={cn("shrink-0", inventoryPartial && "border-amber-500/40 bg-amber-500/5")}
+        >
+          <AlertDescription
+            className={cn(
+              "flex items-center justify-between gap-3",
+              inventoryPartial && "text-amber-700 dark:text-amber-300",
+            )}
+          >
             <span>{inventoryError}</span>
             <Button variant="outline" size="sm" onClick={handleRescan}>
               {t("quickLaunch.rescan")}
@@ -599,7 +665,10 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
           <span className="text-muted-foreground hidden shrink-0 items-center text-xs tabular-nums md:flex">
             {searchQuery
               ? t("quickLaunch.searchResult", { count: totalApps })
-              : t("quickLaunch.totalApps", { count: appManagerApps.length, scenes: sceneCount })}
+              : t("quickLaunch.totalApps", {
+                  count: appManagerApps.length,
+                  scenes: sceneCount,
+                })}
           </span>
         )}
 
@@ -726,6 +795,7 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
               <MergedSceneSection
                 key="merged"
                 sceneApps={sceneApps}
+                displayNames={displayNames}
                 onLaunch={handleLaunch}
                 onReveal={handleReveal}
                 isEditMode={isEditMode}
@@ -741,6 +811,7 @@ export default function QuickLaunch({ active }: { active: boolean; feature: AppF
               key={key}
               scene={LAUNCH_SCENES.find((s) => s.key === key)!}
               apps={sceneApps[key]}
+              displayNames={displayNames}
               expanded={!!expandedScenes[key]}
               onToggle={() => toggleExpandScene(key)}
               onLaunch={handleLaunch}

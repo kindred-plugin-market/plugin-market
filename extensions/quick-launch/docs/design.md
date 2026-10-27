@@ -4,8 +4,9 @@
 
 ## 1. 模块边界
 
-- 页面与 controller：`src/features/quick-launch/`
-- 共享清单：`src/shared/app-inventory/`
+- 页面与 controller：[extensions/quick-launch/src/](../src/)
+- 共享清单：[Bench src/shared/app-inventory/](https://github.com/indredK/bench/tree/main/src/shared/app-inventory)
+- 虚拟网格：[Bench VirtualGridView](https://github.com/indredK/bench/blob/main/src/components/content/VirtualGridView.tsx)
 - 后端能力：App Manager 的 `appId -> LaunchTarget`
 
 Quick Launch 只负责搜索、分类、用户覆盖和启动交互。扫描、平台路径、AUMID、图标与 revision 由共享 inventory 提供。
@@ -22,6 +23,8 @@ Quick Launch 只负责搜索、分类、用户覆盖和启动交互。扫描、�
 | 性能   | 大列表使用 `VirtualGridView`；图标仅按可见项加载                        |
 | 分类   | 执行器与规则分离并带版本；overrides 带 schema version 持久化            |
 | 搜索   | 使用 Unicode NFKC，并包含当前语言的场景文案                             |
+| 名称   | 无可见名称的应用不得进入场景；重复名称显示 bundle ID，截断文本提供完整标题 |
+| 来源   | `unsupported` 是正常能力状态；只对 `partial/failed/timedOut` 显示局部告警并本地化来源名 |
 
 ## 3. 平台现状
 
@@ -38,12 +41,12 @@ Quick Launch 只负责搜索、分类、用户覆盖和启动交互。扫描、�
 
 | 需求                | 修改位置                            |
 | ------------------- | ----------------------------------- |
-| inventory 刷新/取消 | `src/shared/app-inventory/`         |
-| 页面状态与交互      | `hooks/useQuickLaunchController.ts` |
-| 分类执行            | `classification-engine.ts`          |
-| 分类规则            | `scenes.ts`                         |
-| 用户覆盖            | `store.ts`                          |
-| 列表与加载 UI       | `page.tsx`                          |
+| inventory 刷新/取消 | Bench `src/shared/app-inventory/`                         |
+| 页面状态与交互      | `extensions/quick-launch/src/hooks/`                       |
+| 分类执行            | `extensions/quick-launch/src/classification-engine.ts`     |
+| 分类规则            | `extensions/quick-launch/src/scenes.ts`                    |
+| 用户覆盖            | `extensions/quick-launch/src/store.ts`                     |
+| 列表与加载 UI       | `extensions/quick-launch/src/page.tsx`                     |
 
 不要在 Quick Launch 中新增平台分支或 Tauri 直调；平台差异必须留在后端 adapter。
 

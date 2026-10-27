@@ -5,11 +5,7 @@
  */
 import type { AppInfo } from "@/lib/tauri/types/app-manager"
 import type { LaunchSceneKey } from "@extension/types"
-import {
-  classifyAppToScene,
-  LAUNCH_SCENES,
-  SCENE_RULES_VERSION,
-} from "@extension/scenes"
+import { classifyAppToScene, LAUNCH_SCENES, SCENE_RULES_VERSION } from "@extension/scenes"
 
 export interface ClassificationSnapshot {
   ruleVersion: string
@@ -22,12 +18,19 @@ export function createEmptyClassification(): Record<LaunchSceneKey, string[]> {
   return scenes
 }
 
+export function hasVisibleAppName(name: string): boolean {
+  // Some macOS service bundles contain only bidi formatting marks. Keep marks
+  // around real RTL text, but do not create an unlabelled launcher card for
+  // names that contain no visible character.
+  return name.replace(/\p{Cf}/gu, "").trim().length > 0
+}
+
 export function classifyInventory(apps: AppInfo[]): ClassificationSnapshot {
   const scenes = createEmptyClassification()
   const names = new Map(apps.map((app) => [app.appId, app.name]))
 
   for (const app of apps) {
-    if (!app.allowedActions.launch) continue
+    if (!app.allowedActions.launch || !hasVisibleAppName(app.name)) continue
     scenes[classifyAppToScene(app)].push(app.appId)
   }
   for (const scene of LAUNCH_SCENES) {

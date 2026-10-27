@@ -11,6 +11,7 @@ import {
   autoClassifyApps,
   applyOverrides,
   exportFullClassification,
+  incompleteInventoryProviders,
 } from "@extension/services/quick-launch.use-cases"
 import { writeTextFile } from "@/lib/tauri/commands/file-ops"
 import { getErrorMessage } from "@/lib/tauri/errors"
@@ -53,13 +54,26 @@ export function useQuickLaunchController(active: boolean) {
   const appManagerLoading = inventoryStatus === "loading" || inventoryStatus === "refreshing"
   const appManagerScanProgress = useAppInventoryStore((s) => s.progress)
   const inventoryMessage = useMemo(() => {
-    if (inventoryError) return inventoryError
+    if (inventoryError) return { text: inventoryError, partial: false }
     if (inventoryStatus !== "partial") return null
-    const providers = (inventorySnapshot?.providers ?? [])
-      .filter((provider) => provider.state !== "ok")
-      .map((provider) => provider.provider)
-      .join(", ")
-    return t("quickLaunch.scanPartial", { providers })
+
+    const providerNames = incompleteInventoryProviders(inventorySnapshot?.providers ?? [])
+    if (providerNames.length === 0) return null
+
+    const labels: Record<string, string> = {
+      filesystem: t("quickLaunch.providers.filesystem"),
+      spotlight: t("quickLaunch.providers.spotlight"),
+      homebrew: t("quickLaunch.providers.homebrew"),
+      registry: t("quickLaunch.providers.registry"),
+      appsFolder: t("quickLaunch.providers.appsFolder"),
+      winget: t("quickLaunch.providers.winget"),
+    }
+    return {
+      text: t("quickLaunch.scanPartial", {
+        providers: providerNames.map((name) => labels[name] ?? name).join(", "),
+      }),
+      partial: true,
+    }
   }, [inventoryError, inventorySnapshot?.providers, inventoryStatus, t])
 
   const scenes = useQuickLaunchStore((s) => s.scenes)
@@ -371,7 +385,8 @@ export function useQuickLaunchController(active: boolean) {
     appManagerLoading,
     appManagerScanProgress,
     hydrating,
-    inventoryError: inventoryMessage,
+    inventoryError: inventoryMessage?.text ?? null,
+    inventoryPartial: inventoryMessage?.partial ?? false,
     scenes,
     sceneOrder,
     expandedScenes,

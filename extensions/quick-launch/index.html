@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>快捷启动</title>
+    <script>
+      // Match the host before first paint; extension windows have an isolated DOM.
+      ;(function () {
+        try {
+          var theme = localStorage.getItem("theme")
+          if (
+            theme === "dark" ||
+            (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          ) {
+            document.documentElement.classList.add("dark")
+          }
+        } catch (e) {}
+        try {
+          var stored = localStorage.getItem("windowTheme")
+          var isMac = navigator.userAgent.toLowerCase().indexOf("mac") !== -1
+          document.documentElement.setAttribute(
+            "data-window-theme",
+            stored === "glass" && isMac ? "glass" : "default",
+          )
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
