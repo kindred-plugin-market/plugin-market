@@ -3,7 +3,9 @@
 > **完备功能规格** → [design.md](./design.md)
 > **规划功能** → [roadmap.md](./roadmap.md)
 
-代码：`src/features/quick-launch/`
+插件前端：[extensions/quick-launch/src/](../src/)
+
+Bench 宿主提供共享清单、IPC 与虚拟网格：[共享清单](https://github.com/indredK/bench/tree/main/src/shared/app-inventory) · [VirtualGridView](https://github.com/indredK/bench/blob/main/src/components/content/VirtualGridView.tsx)
 
 定位：macOS/Windows 跨平台场景化应用启动器，按 14 个「启动场景」自动分类已安装应用，一键启动或在 Finder 中显示；支持用户手动改分类并持久化。
 

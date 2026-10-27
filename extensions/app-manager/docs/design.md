@@ -5,10 +5,10 @@
 
 ## 1. 模块边界
 
-- 前端：`src/features/app-manager/`
-- 共享应用清单：`src/shared/app-inventory/`
-- IPC 契约：`src/lib/tauri/contracts.ts`、`src/lib/tauri/commands/app-manager.ts`
-- 后端：`src-tauri/src/app_manager/`
+- 插件前端：[extensions/app-manager/src/](../src/)
+- Bench 共享应用清单：[src/shared/app-inventory/](https://github.com/indredK/bench/tree/main/src/shared/app-inventory)
+- Bench IPC 契约：[src/lib/tauri/contracts.ts](https://github.com/indredK/bench/blob/main/src/lib/tauri/contracts.ts) · [src/lib/tauri/commands/app-manager.ts](https://github.com/indredK/bench/blob/main/src/lib/tauri/commands/app-manager.ts)
+- Bench 后端：[src-tauri/src/app_manager/](https://github.com/indredK/bench/tree/main/src-tauri/src/app_manager)
 
 App Manager 后端 inventory 是应用清单唯一真理源。Quick Launch 只消费带 `revision` 的 snapshot，不维护第二套扫描流程。
 
@@ -41,12 +41,12 @@ App Manager 后端 inventory 是应用清单唯一真理源。Quick Launch 只�
 
 | 需求                             | 修改位置                                                               |
 | -------------------------------- | ---------------------------------------------------------------------- |
-| 应用扫描/平台适配                | `src-tauri/src/app_manager/{macos,windows}.rs`                         |
-| 来源授权规则                     | `src-tauri/src/app_manager/domain.rs`                                  |
-| scan/update single-flight 与缓存 | `src-tauri/src/app_manager/state.rs`、`commands.rs`                    |
-| 更新下载与安装                   | `src-tauri/src/app_manager/installer/`                                 |
-| 前端更新列表与状态               | `src/features/app-manager/hooks/`、`components/SoftwareUpdateView.tsx` |
-| IPC DTO/命令                     | TS/Rust 两侧契约同时修改                                               |
+| 应用扫描/平台适配                | Bench `src-tauri/src/app_manager/{macos,windows}.rs`                   |
+| 来源授权规则                     | Bench `src-tauri/src/app_manager/domain.rs`                            |
+| scan/update single-flight 与缓存 | Bench `src-tauri/src/app_manager/state.rs`、`commands.rs`              |
+| 更新下载与安装                   | Bench `src-tauri/src/app_manager/installer/`                           |
+| 前端更新列表与状态               | `extensions/app-manager/src/hooks/`、`components/SoftwareUpdateView.tsx`|
+| IPC DTO/命令                     | Bench 仓库 TS/Rust 两侧契约同时修改                                    |
 
 修改后必须保留上述约束，并为 bug 增加最小回归测试。
 
