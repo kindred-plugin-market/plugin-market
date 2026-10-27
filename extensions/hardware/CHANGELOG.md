@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/kindred-plugin-market/plugin-market/compare/hardware-v1.0.2...hardware-v1.0.3) (2026-10-27)
+
+
+### Bug Fixes
+
+* **hardware:** localize shared GPU filter controls ([#46](https://github.com/kindred-plugin-market/plugin-market/issues/46)) ([79d0df5](https://github.com/kindred-plugin-market/plugin-market/commit/79d0df5923a398cd294b268203b39f6724a3e443))
+
 ## [1.0.2](https://github.com/kindred-plugin-market/plugin-market/compare/hardware-v1.0.1...hardware-v1.0.2) (2026-09-16)
 
 

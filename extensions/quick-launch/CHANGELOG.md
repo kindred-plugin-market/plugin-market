@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/kindred-plugin-market/plugin-market/compare/quick-launch-v1.0.4...quick-launch-v1.1.0) (2026-10-27)
+
+
+### Features
+
+* **quick-launch:** virtualize large app lists ([#51](https://github.com/kindred-plugin-market/plugin-market/issues/51)) ([aa52938](https://github.com/kindred-plugin-market/plugin-market/commit/aa529385752eb44fcb3dc77e35836b1686b6cbd9))
+
 ## [1.0.4](https://github.com/kindred-plugin-market/plugin-market/compare/quick-launch-v1.0.3...quick-launch-v1.0.4) (2026-09-16)
 
 
