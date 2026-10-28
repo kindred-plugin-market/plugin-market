@@ -142,7 +142,9 @@ export function InstallDetail({ app, onInstall, onOpenWebsite }: InstallDetailPr
           )}
         </div>
         <div>
-          <h3 className="text-sm font-semibold">{app.name}</h3>
+          <h3 className="text-sm font-semibold">
+            {app.nameKey ? t(app.nameKey, { defaultValue: app.name }) : app.name}
+          </h3>
           <p className="text-muted-foreground mt-0.5 text-xs">{app.bundleId}</p>
         </div>
       </div>
@@ -155,7 +157,7 @@ export function InstallDetail({ app, onInstall, onOpenWebsite }: InstallDetailPr
         )}
         <MetadataRow
           label={t("appManager.detailSource")}
-          value={getInstallSourceLabel(app.installSource)}
+          value={getInstallSourceLabel(app.installSource, app.nativeToolId)}
         />
         {app.description && (
           <MetadataRow

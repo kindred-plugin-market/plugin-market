@@ -37,6 +37,14 @@ App Manager 后端 inventory 是应用清单唯一真理源。Quick Launch 只�
 
 以上是代码能力，不等于真机行为已通过。
 
+## 3.1 私有 Swift 原生工具
+
+- `本地工具箱` 与 `ABB 开发工具箱` 以 macOS `.app` 安装包分发，不作为 extension bundle 加载；App Manager 是插件中心中的安装入口。
+- App Manager 只提交固定 `nativeToolId`。Bench 后端从固定私有仓库 `indredK/bench-native-apps` 读取 Release 清单与资产，不接受 renderer 提交 URL、路径、Bundle ID 或 hash。
+- 安装需要 macOS、GitHub CLI 已安装并登录到可读该私有仓库的账号。宿主校验 Release 清单、SHA-256、固定 Bundle ID / Team ID、代码签名与 Gatekeeper assessment；失败时拒绝安装，且不移除 quarantine 属性。
+- 私有 Release 只发布 Developer ID Application 签名并经 Apple notarization 的包。开发预览 CI 产物不属于可安装 Release。
+- 两款应用继续由各自 Swift / SwiftUI 工程维护；改动安装入口不要求迁移到 JavaScript、Rust 或其他语言。
+
 ## 4. 修改入口
 
 | 需求                             | 修改位置                                                               |

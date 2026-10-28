@@ -24,6 +24,11 @@
       "filterSystem": "System Apps",
       "filterLaunchable": "Launchable",
       "filterManaged": "Managed",
+      "nativeTools": {
+        "localToolbox": "Local Toolbox",
+        "abbDevelopmentToolbox": "ABB Development Toolbox"
+      },
+      "sourcePrivateNative": "Bench private native app",
       "sourceHomebrewCask": "Homebrew",
       "sourceMacBundle": "Mac Bundle",
       "sourceAppStore": "App Store",
@@ -85,6 +90,7 @@
       "batchActionUninstall": "Uninstall",
       "batchInstallConfirmTitle": "Install {{count}} apps?",
       "batchInstallConfirmDescription": "Install {{count}} selected apps?",
+      "batchNativeToolInstallConfirmDescription": "The selection includes {{count}} private Bench native app(s). Bench will download them from the private GitHub Release, verify Apple signatures, and install to ~/Applications. GitHub CLI must be signed in with repository read access.",
       "batchUpgradeConfirmDescription": "Upgrade {{count}} apps to their latest versions?",
       "batchUninstallConfirmDescription": "Uninstall {{count}} apps? This cannot be undone.",
       "batchSelectedAppsLabel": "The following apps will be included",
@@ -150,6 +156,7 @@
       "installNoResults": "No recommended apps match your search",
       "installConfirmTitle": "Install {{name}}",
       "installConfirmDescription": "This will download and install {{name}} on your system.",
+      "nativeToolInstallConfirmDescription": "Bench will download the notarized native app from your private GitHub Release, verify its signature, and install it to ~/Applications. GitHub CLI must be signed in with access to the repository; Bench never reads or stores your GitHub token.",
       "confirmInstall": "Install",
       "installSelected": "Install Selected ({{count}})",
       "clearSelection": "Clear Selection",
@@ -259,6 +266,8 @@
       },
       "missingInstallSource": "Missing install source",
       "recommendedApps": {
+        "local-toolbox": "Local check-in, video, photo triage, and knowledge-base tools",
+        "abb-dev-toolbox": "SwiftUI app for local ABB development services and bookmarks",
         "google-chrome": "Cross-platform web browser by Google",
         "firefox": "Open-source browser focused on privacy",
         "arc": "Innovative modern browser",

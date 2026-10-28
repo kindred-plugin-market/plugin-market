@@ -29,6 +29,7 @@ export interface AppOperationRequest {
   appId: string
   kind: AppOperationKind
   installSource?: InstallListAppInfo["installSource"]
+  nativeToolId?: InstallListAppInfo["nativeToolId"]
 }
 
 export interface AppOperationOutcome {
@@ -254,6 +255,9 @@ function runRepositoryOperation(
     case "uninstall":
       return repository.uninstallApp(request.appId)
     case "install":
+      if (request.nativeToolId) {
+        return repository.installPrivateNativeTool(request.nativeToolId)
+      }
       if (!request.installSource) {
         return Promise.resolve(operationSkippedResult("appManager.missingInstallSource"))
       }

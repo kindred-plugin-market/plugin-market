@@ -47,12 +47,17 @@ export function InstallListCard({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="truncate pr-16 text-sm font-medium">{app.name}</h4>
+              <h4 className="truncate pr-16 text-sm font-medium">
+                {app.nameKey ? t(app.nameKey, { defaultValue: app.name }) : app.name}
+              </h4>
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
                 {t(`appManager.recommendedApps.${app.id}`, { defaultValue: app.description })}
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-1">
-                <InstallSourceBadges installSource={app.installSource} />
+                <InstallSourceBadges
+                  installSource={app.installSource}
+                  nativeToolId={app.nativeToolId}
+                />
               </div>
               {app.installed && (app.installedVersion || app.installedPath) && (
                 <div className="text-muted-foreground mt-1.5 space-y-0.5 text-[11px]">

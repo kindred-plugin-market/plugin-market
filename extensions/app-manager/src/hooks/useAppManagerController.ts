@@ -371,6 +371,7 @@ export function useAppManagerController(active: boolean) {
       _appName: string,
       installSource: InstallListAppInfo["installSource"],
       rescanAfter = true,
+      nativeToolId?: InstallListAppInfo["nativeToolId"],
     ) => {
       const { installStates } = useAppManagerStore.getState()
       if (isOperationRunning(installStates, appId)) return null
@@ -386,6 +387,7 @@ export function useAppManagerController(active: boolean) {
         appId,
         kind: "install",
         installSource,
+        nativeToolId,
       })
       if (!outcome) return null
 
@@ -661,9 +663,10 @@ export function useAppManagerController(active: boolean) {
   const handleInstall = useCallback(
     (app: InstallListAppInfo) => {
       if (app.installed) return
-      openInstallConfirmDialog(app.id, app.name)
+      const appName = app.nameKey ? t(app.nameKey, { defaultValue: app.name }) : app.name
+      openInstallConfirmDialog(app.id, appName, app.nativeToolId)
     },
-    [openInstallConfirmDialog],
+    [openInstallConfirmDialog, t],
   )
 
   const toggleInstallSelect = useCallback((id: string) => {
@@ -696,7 +699,7 @@ export function useAppManagerController(active: boolean) {
     closeInstallConfirmDialog()
     const app = installListApps.find((item) => item.id === appId)
     if (app && !app.installed) {
-      await doInstall(app.id, app.name, app.installSource)
+      await doInstall(app.id, app.name, app.installSource, true, app.nativeToolId)
     }
   }, [installConfirmDialog, closeInstallConfirmDialog, installListApps, doInstall])
 
@@ -883,6 +886,13 @@ export function useAppManagerController(active: boolean) {
         .map((app) => app.name),
     [installListApps, selectedInstallIds],
   )
+  const selectedNativeToolCount = useMemo(
+    () =>
+      installListApps.filter(
+        (app) => !app.installed && Boolean(app.nativeToolId) && selectedInstallIds.has(app.id),
+      ).length,
+    [installListApps, selectedInstallIds],
+  )
   const selectedInstallableCount = selectedInstallableIds.length
   const selectedMarketplaceUninstallableIds = useMemo(
     () =>
@@ -919,8 +929,13 @@ export function useAppManagerController(active: boolean) {
       appIds: selectedInstallableIds,
       source: "marketplace",
     }
-    openBatchConfirmDialog("install", selectedInstallableIds.length, selectedInstallableNames)
-  }, [selectedInstallableIds, selectedInstallableNames, openBatchConfirmDialog])
+    openBatchConfirmDialog(
+      "install",
+      selectedInstallableIds.length,
+      selectedInstallableNames,
+      selectedNativeToolCount,
+    )
+  }, [selectedInstallableIds, selectedInstallableNames, selectedNativeToolCount, openBatchConfirmDialog])
 
   const handleBatchInstallListUninstall = useCallback(() => {
     if (selectedMarketplaceUninstallableIds.length === 0) return
@@ -989,7 +1004,7 @@ export function useAppManagerController(active: boolean) {
         if (batchInstallCancelRef.current) break
         const app = installListApps.find((item) => item.id === id)
         if (app && !app.installed) {
-          const result = await doInstall(app.id, app.name, app.installSource, false)
+          const result = await doInstall(app.id, app.name, app.installSource, false, app.nativeToolId)
           if (result) {
             results.push({
               appId: app.id,

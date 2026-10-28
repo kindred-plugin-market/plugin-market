@@ -32,7 +32,8 @@ export function createInstallListColumns({
     {
       id: "name",
       header: t("appManager.column.name"),
-      accessorFn: (app) => app.name,
+      accessorFn: (app) =>
+        app.nameKey ? t(app.nameKey, { defaultValue: app.name }) : app.name,
       meta: { minWidth: "80px" },
       cell: ({ getValue }) => (
         <StickyTableText className="text-sm font-medium">{getValue() as string}</StickyTableText>
@@ -71,10 +72,14 @@ export function createInstallListColumns({
     {
       id: "source",
       header: t("appManager.column.source"),
-      accessorFn: (app) => getInstallSourceLabel(app.installSource),
+      accessorFn: (app) => getInstallSourceLabel(app.installSource, app.nativeToolId),
       meta: { width: "120px" },
       cell: ({ row }) => (
-        <InstallSourceBadges installSource={row.original.installSource} className="text-[10px]" />
+        <InstallSourceBadges
+          installSource={row.original.installSource}
+          nativeToolId={row.original.nativeToolId}
+          className="text-[10px]"
+        />
       ),
     },
     {
