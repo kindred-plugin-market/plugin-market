@@ -99,10 +99,10 @@ export function createAppManagerBasicActions(set: SetState) {
       set((state) => ({
         installStates: { ...state.installStates, [appId]: { status, message } },
       })),
-    openInstallConfirmDialog: (appId: string, appName: string) =>
-      set({ installConfirmDialog: { open: true, appId, appName } }),
+    openInstallConfirmDialog: (appId: string, appName: string, nativeToolId?: string) =>
+      set({ installConfirmDialog: { open: true, appId, appName, nativeToolId } }),
     closeInstallConfirmDialog: () =>
-      set({ installConfirmDialog: { open: false, appId: "", appName: "" } }),
+      set({ installConfirmDialog: { open: false, appId: "", appName: "", nativeToolId: undefined } }),
 
     toggleSelectApp: (appId: string) =>
       set((state) => {
@@ -119,9 +119,18 @@ export function createAppManagerBasicActions(set: SetState) {
       action: "upgrade" | "uninstall" | "install",
       count: number,
       names: string[] = [],
-    ) => set({ batchConfirmDialog: { open: true, action, count, names } }),
+      nativeToolCount = 0,
+    ) => set({ batchConfirmDialog: { open: true, action, count, names, nativeToolCount } }),
     closeBatchConfirmDialog: () =>
-      set({ batchConfirmDialog: { open: false, action: "upgrade", count: 0, names: [] } }),
+      set({
+        batchConfirmDialog: {
+          open: false,
+          action: "upgrade",
+          count: 0,
+          names: [],
+          nativeToolCount: 0,
+        },
+      }),
     clearBatchResults: () => set({ batchResults: null }),
 
     setViewMode: (mode: "table" | "grid") => set({ viewMode: mode }),

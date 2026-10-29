@@ -24,6 +24,11 @@
       "filterSystem": "系统应用",
       "filterLaunchable": "可启动",
       "filterManaged": "可管理",
+      "nativeTools": {
+        "localToolbox": "本地工具箱",
+        "abbDevelopmentToolbox": "ABB 开发工具箱"
+      },
+      "sourcePrivateNative": "Bench 私有 Swift 预编译包",
       "sourceHomebrewCask": "Homebrew",
       "sourceMacBundle": "Mac 原生",
       "sourceAppStore": "App Store",
@@ -85,6 +90,7 @@
       "batchActionUninstall": "卸载",
       "batchInstallConfirmTitle": "安装 {{count}} 个应用？",
       "batchInstallConfirmDescription": "确认安装选中的 {{count}} 个应用？",
+      "batchNativeToolInstallConfirmDescription": "所选项目含 {{count}} 个 Bench 私有 Swift 应用。Bench 会从当前 main 成功的 macOS CI 下载预编译应用，校验 GitHub SHA-256 后安装到 ~/Applications；目前仅支持 Apple Silicon。需要已登录且有仓库与 Actions 读取权限的 gh；不需要本机安装 Xcode。CI 下载包保留 90 天，过期后可手动运行 verify 工作流重新生成。应用为 ad-hoc 签名，重装后可能要重新授予辅助功能权限。Bench 不会自动绕过 Gatekeeper；若 macOS 拦截，请你在“系统设置 > 隐私与安全性”手动决定是否打开。",
       "batchUpgradeConfirmDescription": "确定要批量升级 {{count}} 个应用吗？每个应用将升级至最新版本。",
       "batchUninstallConfirmDescription": "确定要批量卸载 {{count}} 个应用吗？此操作不可撤销。",
       "batchSelectedAppsLabel": "本次将处理以下应用",
@@ -150,6 +156,7 @@
       "installNoResults": "没有匹配的推荐应用",
       "installConfirmTitle": "安装 {{name}}",
       "installConfirmDescription": "将下载并安装 {{name}} 到您的系统。",
+      "nativeToolInstallConfirmDescription": "Bench 会从当前 main 成功的 macOS CI 下载预编译应用，校验 GitHub Artifact SHA-256、应用 ID 和 ad-hoc 签名后安装到 ~/Applications；目前仅支持 Apple Silicon。需要已登录且有仓库与 Actions 读取权限的 gh，不需要本机安装 Xcode。CI 下载包保留 90 天，过期后可手动运行 verify 工作流重新生成。应用为 ad-hoc 签名，重装后可能需要重新授予辅助功能权限。Bench 不会读取或保存 gh 凭据，不会清除隔离属性或自动绕过 Gatekeeper；若 macOS 拦截，请你在“系统设置 > 隐私与安全性”手动决定是否打开。",
       "confirmInstall": "安装",
       "installSelected": "安装选中 ({{count}})",
       "clearSelection": "取消选中",
@@ -259,6 +266,8 @@
       },
       "missingInstallSource": "缺少安装来源",
       "recommendedApps": {
+        "local-toolbox": "本机签到、视频下载、照片筛选和知识库工具（从私有 CI 下载预编译包）",
+        "abb-dev-toolbox": "用于 ABB 本机开发服务和书签管理的 SwiftUI 预编译应用",
         "google-chrome": "Google 出品的跨平台网页浏览器",
         "firefox": "Mozilla 开源网页浏览器,注重隐私保护",
         "arc": "革新性的现代化浏览器",

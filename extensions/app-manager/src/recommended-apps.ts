@@ -20,6 +20,10 @@ export interface RecommendedApp {
     snap?: string
     url?: string
   }
+  /** Host-resolved private Swift app; renderer may pass this ID only. */
+  nativeToolId?: "local-toolbox" | "abb-dev-toolbox"
+  nameKey?: string
+  platforms?: Array<"macos" | "windows" | "linux">
   iconKey: string
   recommended: boolean
   popularity?: number
@@ -387,6 +391,36 @@ export const RECOMMENDED_APPS: RecommendedApp[] = [
     popularity: 85,
   },
   {
+    id: "local-toolbox",
+    name: "本地工具箱",
+    nameKey: "appManager.nativeTools.localToolbox",
+    bundleIdPattern: "com.local.dailycheckin.helper",
+    category: "development",
+    series: "other",
+    description: "Private Swift app for local workflows and knowledge-base tools",
+    installSource: {},
+    nativeToolId: "local-toolbox",
+    platforms: ["macos"],
+    iconKey: "native-toolbox",
+    recommended: true,
+    popularity: 100,
+  },
+  {
+    id: "abb-dev-toolbox",
+    name: "ABB 开发工具箱",
+    nameKey: "appManager.nativeTools.abbDevelopmentToolbox",
+    bundleIdPattern: "com.local.devservicemanager",
+    category: "development",
+    series: "other",
+    description: "Private SwiftUI app for local ABB development workflows",
+    installSource: {},
+    nativeToolId: "abb-dev-toolbox",
+    platforms: ["macos"],
+    iconKey: "native-toolbox",
+    recommended: true,
+    popularity: 99,
+  },
+  {
     id: "warp",
     name: "Warp",
     bundleIdPattern: "dev.warp.WarpStable",
@@ -591,8 +625,11 @@ function findInstalledMatch(
 
 export function getRecommendedInstallList(
   installedApps: InstalledAppFingerprint[],
+  platform?: "macos" | "windows" | "linux",
 ): RecommendedAppInstallStatus[] {
-  return RECOMMENDED_APPS.map((app) => {
+  return RECOMMENDED_APPS.filter(
+    (app) => !platform || !app.platforms || app.platforms.includes(platform),
+  ).map((app) => {
     const match = findInstalledMatch(app, installedApps)
     const installedApp = match?.app
     return {

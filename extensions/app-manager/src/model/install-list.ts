@@ -2,13 +2,14 @@
  * Feature Model / 功能模型: keep pure model logic; 只放纯模型逻辑.
  */
 import type { AppInfo, InstallListAppInfo } from "@/lib/tauri/types/app-manager"
+import { platformName } from "@/platform/config"
 import {
   getRecommendedInstallList,
   type RecommendedAppInstallStatus,
 } from "@extension/recommended-apps"
 
 export function createInstallListApps(apps: AppInfo[]): InstallListAppInfo[] {
-  return getRecommendedInstallList(apps).map((app: RecommendedAppInstallStatus) => ({
+  return getRecommendedInstallList(apps, platformName).map((app: RecommendedAppInstallStatus) => ({
     _virtual: true as const,
     id: app.id,
     name: app.name,
@@ -17,6 +18,8 @@ export function createInstallListApps(apps: AppInfo[]): InstallListAppInfo[] {
     series: app.series,
     description: app.description,
     installSource: app.installSource,
+    nativeToolId: app.nativeToolId,
+    nameKey: app.nameKey,
     iconKey: app.iconKey,
     installed: app.installed,
     installedAppId: app.installedAppId,

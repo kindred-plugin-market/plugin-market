@@ -43,4 +43,15 @@ describe("recommended app correlation", () => {
     expect(chrome?.installedAppId).toBe("app-v1-chrome")
     expect(chrome?.installedCanUninstall).toBe(true)
   })
+
+  it("shows native toolbox apps only on macOS and keeps their fixed host IDs", () => {
+    const macApps = getRecommendedInstallList([], "macos")
+    const winApps = getRecommendedInstallList([], "windows")
+
+    expect(macApps.find((app) => app.id === "local-toolbox")?.nativeToolId).toBe("local-toolbox")
+    expect(macApps.find((app) => app.id === "abb-dev-toolbox")?.nativeToolId).toBe(
+      "abb-dev-toolbox",
+    )
+    expect(winApps.some((app) => app.nativeToolId)).toBe(false)
+  })
 })

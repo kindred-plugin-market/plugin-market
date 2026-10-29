@@ -29,6 +29,7 @@
       "batch_upgrade_apps",
       "batch_uninstall_apps",
       "install_app",
+      "install_private_native_tool",
       "cancel_batch_operation",
       "check_all_app_updates",
       "open_in_mac_app_store",
