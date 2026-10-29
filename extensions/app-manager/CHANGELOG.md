@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.2.0...app-manager-v1.2.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **app-manager:** require Bench 1.39 for native apps ([#60](https://github.com/kindred-plugin-market/plugin-market/issues/60)) ([11e96d4](https://github.com/kindred-plugin-market/plugin-market/commit/11e96d42ff0cafb03a3c6bbfdb123c5200e34cb1))
+
 ## [1.2.0](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.1.0...app-manager-v1.2.0) (2026-10-29)
 
 
