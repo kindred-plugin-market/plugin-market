@@ -27,7 +27,6 @@ const createRepository = (overrides: Partial<AppManagerRepository> = {}): AppMan
   batchUninstallApps: vi.fn(),
   installApp: vi.fn(),
   cancelAppUpdate: vi.fn(),
-  installPrivateNativeTool: vi.fn(),
   cancelBatchOperation: vi.fn(),
   checkAllAppUpdates: vi.fn(),
   openInMacAppStore: vi.fn(),
@@ -95,27 +94,6 @@ describe("appManagerUseCases", () => {
     })
 
     expect(repository.installApp).toHaveBeenCalledWith("demo", installSource)
-    expect(outcome).toMatchObject({
-      kind: "install",
-      shouldRescan: true,
-      result: { success: true, message: "installed" },
-    })
-  })
-
-  it("routes a catalog ID through the host-managed private native app installer", async () => {
-    const repository = createRepository({
-      installPrivateNativeTool: vi.fn().mockResolvedValue(ok("installed")),
-    })
-    const useCases = createAppManagerUseCases(repository, () => true)
-
-    const outcome = await useCases.runAppOperation({
-      appId: "local-toolbox",
-      kind: "install",
-      nativeToolId: "local-toolbox",
-    })
-
-    expect(repository.installPrivateNativeTool).toHaveBeenCalledWith("local-toolbox")
-    expect(repository.installApp).not.toHaveBeenCalled()
     expect(outcome).toMatchObject({
       kind: "install",
       shouldRescan: true,

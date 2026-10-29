@@ -157,7 +157,7 @@ export function InstallDetail({ app, onInstall, onOpenWebsite }: InstallDetailPr
         )}
         <MetadataRow
           label={t("appManager.detailSource")}
-          value={getInstallSourceLabel(app.installSource, app.nativeToolId)}
+          value={getInstallSourceLabel(app.installSource)}
         />
         {app.description && (
           <MetadataRow
