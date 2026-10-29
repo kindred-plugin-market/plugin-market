@@ -9,18 +9,15 @@ import type { InstallSource } from "@/lib/tauri/types/app-manager"
 
 interface InstallSourceBadgesProps {
   installSource: InstallSource
-  nativeToolId?: string
   className?: string
 }
 
 export function InstallSourceBadges({
   installSource,
-  nativeToolId,
   className = "text-[10px] px-1 py-0",
 }: InstallSourceBadgesProps) {
   const { t } = useTranslation()
   const labels: string[] = []
-  if (nativeToolId) labels.push(t("appManager.sourcePrivateNative"))
   if (installSource.brew) labels.push(t("appManager.sourceHomebrewCask"))
   if (installSource.winget) labels.push(t("appManager.sourceWinget"))
   if (installSource.flatpak) labels.push(t("appManager.sourceFlatpak"))
@@ -60,8 +57,7 @@ export function InstallSourceBadges({
   )
 }
 
-export function getInstallSourceLabel(installSource: InstallSource, nativeToolId?: string): string {
-  if (nativeToolId) return i18n.t("appManager.sourcePrivateNative")
+export function getInstallSourceLabel(installSource: InstallSource): string {
   if (installSource.brew) return i18n.t("appManager.sourceHomebrewCask")
   if (installSource.winget) return i18n.t("appManager.sourceWinget")
   if (installSource.flatpak) return i18n.t("appManager.sourceFlatpak")

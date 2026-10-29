@@ -57,13 +57,6 @@ vi.mock("@/lib/tauri/commands/app-manager", () => ({
     errorCode: null,
     permissionIssue: false,
   })),
-  installPrivateNativeTool: vi.fn(async () => ({
-    success: true,
-    message: "ok",
-    exitCode: 0,
-    errorCode: null,
-    permissionIssue: false,
-  })),
   installAppUpdate: vi.fn(async () => {}),
   launchApp: vi.fn(async () => {}),
   authorizeMacApp: vi.fn(async () => ({

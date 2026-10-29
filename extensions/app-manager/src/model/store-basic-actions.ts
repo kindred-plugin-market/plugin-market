@@ -99,10 +99,10 @@ export function createAppManagerBasicActions(set: SetState) {
       set((state) => ({
         installStates: { ...state.installStates, [appId]: { status, message } },
       })),
-    openInstallConfirmDialog: (appId: string, appName: string, nativeToolId?: string) =>
-      set({ installConfirmDialog: { open: true, appId, appName, nativeToolId } }),
+    openInstallConfirmDialog: (appId: string, appName: string) =>
+      set({ installConfirmDialog: { open: true, appId, appName } }),
     closeInstallConfirmDialog: () =>
-      set({ installConfirmDialog: { open: false, appId: "", appName: "", nativeToolId: undefined } }),
+      set({ installConfirmDialog: { open: false, appId: "", appName: "" } }),
 
     toggleSelectApp: (appId: string) =>
       set((state) => {
@@ -119,8 +119,7 @@ export function createAppManagerBasicActions(set: SetState) {
       action: "upgrade" | "uninstall" | "install",
       count: number,
       names: string[] = [],
-      nativeToolCount = 0,
-    ) => set({ batchConfirmDialog: { open: true, action, count, names, nativeToolCount } }),
+    ) => set({ batchConfirmDialog: { open: true, action, count, names } }),
     closeBatchConfirmDialog: () =>
       set({
         batchConfirmDialog: {
@@ -128,7 +127,6 @@ export function createAppManagerBasicActions(set: SetState) {
           action: "upgrade",
           count: 0,
           names: [],
-          nativeToolCount: 0,
         },
       }),
     clearBatchResults: () => set({ batchResults: null }),

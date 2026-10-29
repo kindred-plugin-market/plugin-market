@@ -25,7 +25,6 @@ interface InstallConfirmDialogState {
   open: boolean
   appId: string
   appName: string
-  nativeToolId?: string
 }
 
 interface AuthorizeConfirmDialogState {
@@ -39,7 +38,6 @@ interface BatchConfirmDialogState {
   action: "upgrade" | "uninstall" | "install"
   count: number
   names: string[]
-  nativeToolCount: number
 }
 
 interface AppManagerConfirmDialogsProps {
@@ -125,9 +123,7 @@ export function AppManagerConfirmDialogs({
               {t("appManager.installConfirmTitle", { name: installConfirmDialog.appName })}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {installConfirmDialog.nativeToolId
-                ? t("appManager.nativeToolInstallConfirmDescription")
-                : t("appManager.installConfirmDescription", { name: installConfirmDialog.appName })}
+              {t("appManager.installConfirmDescription", { name: installConfirmDialog.appName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -191,11 +187,7 @@ export function AppManagerConfirmDialogs({
                   })}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {batchConfirmDialog.action === "install" && batchConfirmDialog.nativeToolCount > 0
-                ? t("appManager.batchNativeToolInstallConfirmDescription", {
-                    count: batchConfirmDialog.nativeToolCount,
-                  })
-                : batchConfirmDialog.action === "install"
+              {batchConfirmDialog.action === "install"
                 ? t("appManager.batchInstallConfirmDescription", {
                     count: batchConfirmDialog.count,
                   })
