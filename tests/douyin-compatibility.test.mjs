@@ -29,11 +29,11 @@ describe("douyin-content-assets host compatibility", () => {
     assert.equal(previousRelease?.yanked, true);
   });
 
-  it("runs the market quality gate against the first released host with those commands", async () => {
+  it("pins the market quality gate to Bench 1.39.0 with native-app and ACL commands", async () => {
     const baseline = (
       await readFile(join(ROOT, ".github/host-baseline.txt"), "utf8")
     ).trim();
 
-    assert.equal(baseline, "5ecb1f0c7f0bdb1daf9482ff18e1f7dad04ec33b");
+    assert.equal(baseline, "26b5fd166840709316434bc6b020e249458e8325");
   });
 });
