@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.1.0...app-manager-v1.2.0) (2026-10-29)
+
+
+### Features
+
+* add private native tools to app manager ([#58](https://github.com/kindred-plugin-market/plugin-market/issues/58)) ([343e354](https://github.com/kindred-plugin-market/plugin-market/commit/343e35409e097fbab079ccc613fd546a59b404a0))
+
 ## [1.1.0](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.0.3...app-manager-v1.1.0) (2026-10-27)
 
 
