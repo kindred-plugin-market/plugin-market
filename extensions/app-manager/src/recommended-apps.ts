@@ -20,8 +20,6 @@ export interface RecommendedApp {
     snap?: string
     url?: string
   }
-  /** Host-resolved private Swift app; renderer may pass this ID only. */
-  nativeToolId?: "local-toolbox" | "abb-dev-toolbox"
   nameKey?: string
   platforms?: Array<"macos" | "windows" | "linux">
   iconKey: string
@@ -389,36 +387,6 @@ export const RECOMMENDED_APPS: RecommendedApp[] = [
     iconKey: "iterm2",
     recommended: true,
     popularity: 85,
-  },
-  {
-    id: "local-toolbox",
-    name: "本地工具箱",
-    nameKey: "appManager.nativeTools.localToolbox",
-    bundleIdPattern: "com.local.dailycheckin.helper",
-    category: "development",
-    series: "other",
-    description: "Private Swift app for local workflows and knowledge-base tools",
-    installSource: {},
-    nativeToolId: "local-toolbox",
-    platforms: ["macos"],
-    iconKey: "native-toolbox",
-    recommended: true,
-    popularity: 100,
-  },
-  {
-    id: "abb-dev-toolbox",
-    name: "ABB 开发工具箱",
-    nameKey: "appManager.nativeTools.abbDevelopmentToolbox",
-    bundleIdPattern: "com.local.devservicemanager",
-    category: "development",
-    series: "other",
-    description: "Private SwiftUI app for local ABB development workflows",
-    installSource: {},
-    nativeToolId: "abb-dev-toolbox",
-    platforms: ["macos"],
-    iconKey: "native-toolbox",
-    recommended: true,
-    popularity: 99,
   },
   {
     id: "warp",

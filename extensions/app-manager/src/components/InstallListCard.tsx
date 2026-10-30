@@ -56,7 +56,6 @@ export function InstallListCard({
               <div className="mt-1.5 flex flex-wrap items-center gap-1">
                 <InstallSourceBadges
                   installSource={app.installSource}
-                  nativeToolId={app.nativeToolId}
                 />
               </div>
               {app.installed && (app.installedVersion || app.installedPath) && (

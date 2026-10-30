@@ -18,7 +18,6 @@ export function createInstallListApps(apps: AppInfo[]): InstallListAppInfo[] {
     series: app.series,
     description: app.description,
     installSource: app.installSource,
-    nativeToolId: app.nativeToolId,
     nameKey: app.nameKey,
     iconKey: app.iconKey,
     installed: app.installed,

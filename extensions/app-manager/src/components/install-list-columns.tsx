@@ -72,12 +72,11 @@ export function createInstallListColumns({
     {
       id: "source",
       header: t("appManager.column.source"),
-      accessorFn: (app) => getInstallSourceLabel(app.installSource, app.nativeToolId),
+      accessorFn: (app) => getInstallSourceLabel(app.installSource),
       meta: { width: "120px" },
       cell: ({ row }) => (
         <InstallSourceBadges
           installSource={row.original.installSource}
-          nativeToolId={row.original.nativeToolId}
           className="text-[10px]"
         />
       ),

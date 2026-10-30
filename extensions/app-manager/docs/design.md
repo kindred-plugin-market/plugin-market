@@ -39,10 +39,10 @@ App Manager 后端 inventory 是应用清单唯一真理源。Quick Launch 只�
 
 ## 3.1 私有 Swift 原生工具
 
-- `本地工具箱` 与 `ABB 开发工具箱` 以 macOS `.app` 安装包分发，不作为 extension bundle 加载；App Manager 是插件中心中的安装入口。
-- App Manager 只提交固定 `nativeToolId`。Bench 后端固定私有仓库 `indredK/bench-native-apps` 与 Artifact 名，不接受 renderer 提交 URL、路径、Bundle ID 或 run ID。
-- 安装需要 Apple Silicon Mac、GitHub CLI 已安装并登录到可读该私有仓库及 Actions Artifacts 的账号。宿主仅在仓库当前 `main` SHA 与成功的 macOS CI push 或手动 `workflow_dispatch` run 完全一致时，才下载该 run 的预编译 Artifact，并校验 run 元数据、分支、SHA、过期状态和 GitHub 提供的 SHA-256 digest。
-- Artifact ZIP 经路径、符号链接和展开体积检查后，宿主验证固定 Bundle ID、ad-hoc 代码签名结构和处理器兼容性；目标路径已存在或任一校验失败时均拒绝安装。不会移除 quarantine、调用 Gatekeeper 放行命令或自动批准系统提示。
+- 「本地工具箱」与「ABB 开发工具箱」由 Bench 插件中心的原生应用市场管理，不属于 App Manager 推荐安装目录，也不作为 extension bundle 加载。
+- App Manager 不请求或调用私有原生应用安装命令；两款 App 的市场入口、安装、启动与卸载由 Bench 宿主负责。
+- 原生应用仍要求 Apple Silicon Mac、GitHub CLI 已登录到可读私有仓库及 Actions Artifacts 的账号。宿主固定仓库与 Artifact，只在当前 `main` SHA 与成功的 macOS CI run 完全一致时下载，并校验 run 元数据、分支、SHA、过期状态与 GitHub SHA-256 digest。
+- Artifact ZIP 经路径、符号链接和展开体积检查后，宿主验证固定 Bundle ID、ad-hoc 代码签名结构和处理器兼容性；安装到 `~/Applications/Bench Apps/`，目标路径已占用或任一校验失败时拒绝安装。卸载时校验 Bundle ID 并将 `.app` 移入废纸篓，不删除应用数据；不会移除 quarantine、调用 Gatekeeper 放行命令或自动批准系统提示。
 - CI 包保留 90 天；过期后可在 `main` 上手动运行 `verify.yml` 重新生成。个人本机安装无需付费 Apple Developer Program，也无需本机安装 Xcode / XcodeGen；所有用户仍需有私有仓库和 Actions 读取权限。Bench 不读取或保存 GitHub CLI 凭据。
 - 本机 ad-hoc 签名下，macOS 可能在重新安装后要求用户再次授予辅助功能权限。
 - 本机 ad-hoc 构建只供当前机器使用，不属于外部分发 Release。向没有私有仓库权限的用户分发仍需 Developer ID Application + Apple notarization，或满足 Apple 条件的组织费用豁免。

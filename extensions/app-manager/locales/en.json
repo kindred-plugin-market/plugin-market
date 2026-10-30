@@ -24,11 +24,6 @@
       "filterSystem": "System Apps",
       "filterLaunchable": "Launchable",
       "filterManaged": "Managed",
-      "nativeTools": {
-        "localToolbox": "Local Toolbox",
-        "abbDevelopmentToolbox": "ABB Development Toolbox"
-      },
-      "sourcePrivateNative": "Bench private Swift prebuilt app",
       "sourceHomebrewCask": "Homebrew",
       "sourceMacBundle": "Mac Bundle",
       "sourceAppStore": "App Store",
@@ -90,7 +85,6 @@
       "batchActionUninstall": "Uninstall",
       "batchInstallConfirmTitle": "Install {{count}} apps?",
       "batchInstallConfirmDescription": "Install {{count}} selected apps?",
-      "batchNativeToolInstallConfirmDescription": "The selection includes {{count}} private Bench Swift app(s). Bench downloads the prebuilt app from a successful macOS CI run for the current main commit, verifies GitHub's SHA-256 digest, and installs it to ~/Applications. Apple Silicon is currently required. GitHub CLI (gh) must be signed in with repository and Actions read access; Xcode is not needed on this Mac. CI artifacts are retained for 90 days; after expiry, manually run the verify workflow to rebuild them. The app is ad-hoc signed, so Accessibility permission may need to be granted again after reinstall. Bench will not bypass Gatekeeper; if macOS blocks the app, decide manually in System Settings > Privacy & Security.",
       "batchUpgradeConfirmDescription": "Upgrade {{count}} apps to their latest versions?",
       "batchUninstallConfirmDescription": "Uninstall {{count}} apps? This cannot be undone.",
       "batchSelectedAppsLabel": "The following apps will be included",
@@ -156,7 +150,6 @@
       "installNoResults": "No recommended apps match your search",
       "installConfirmTitle": "Install {{name}}",
       "installConfirmDescription": "This will download and install {{name}} on your system.",
-      "nativeToolInstallConfirmDescription": "Bench downloads the prebuilt app from a successful macOS CI run for the current main commit, verifies GitHub's artifact SHA-256 digest, the app ID, and ad-hoc signature, then installs it to ~/Applications. Apple Silicon is currently required. GitHub CLI (gh) must be signed in with repository and Actions read access; Xcode is not needed on this Mac. CI artifacts are retained for 90 days; after expiry, manually run the verify workflow to rebuild them. The app is ad-hoc signed, so Accessibility permission may need to be granted again after reinstalling. Bench does not read or save gh credentials, remove quarantine, or bypass Gatekeeper. If macOS blocks the app, decide manually in System Settings > Privacy & Security.",
       "confirmInstall": "Install",
       "installSelected": "Install Selected ({{count}})",
       "clearSelection": "Clear Selection",

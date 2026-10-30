@@ -86,7 +86,6 @@ export interface AppManagerState {
     action: "upgrade" | "uninstall" | "install"
     count: number
     names: string[]
-    nativeToolCount: number
   }
 
   lastScanTime: number
@@ -103,7 +102,6 @@ export interface AppManagerState {
     open: boolean
     appId: string
     appName: string
-    nativeToolId?: string
   }
 
   activeTab: AppManagerTabKey
@@ -145,7 +143,7 @@ export interface AppManagerState {
   closeConfirmDialog: () => void
 
   setInstallState: (appId: string, status: OperationStatus, message?: string) => void
-  openInstallConfirmDialog: (appId: string, appName: string, nativeToolId?: string) => void
+  openInstallConfirmDialog: (appId: string, appName: string) => void
   closeInstallConfirmDialog: () => void
 
   toggleSelectApp: (appId: string) => void
@@ -157,7 +155,6 @@ export interface AppManagerState {
     action: "upgrade" | "uninstall" | "install",
     count: number,
     names?: string[],
-    nativeToolCount?: number,
   ) => void
   closeBatchConfirmDialog: () => void
   clearBatchResults: () => void

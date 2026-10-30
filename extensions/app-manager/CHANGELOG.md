@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.2](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.2.1...app-manager-v1.2.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* **app-manager:** remove native tools from inventory ([5b9fcc6](https://github.com/kindred-plugin-market/plugin-market/commit/5b9fcc6ff53cf95c4a17a820a5f69ecb16de0e07))
+* **app-manager:** remove native tools from inventory ([5ada267](https://github.com/kindred-plugin-market/plugin-market/commit/5ada2676c266ea21549e1358b46b55936f0124c0))
+
+## [1.2.1](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.2.0...app-manager-v1.2.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **app-manager:** require Bench 1.39 for native apps ([#60](https://github.com/kindred-plugin-market/plugin-market/issues/60)) ([11e96d4](https://github.com/kindred-plugin-market/plugin-market/commit/11e96d42ff0cafb03a3c6bbfdb123c5200e34cb1))
+
 ## [1.2.0](https://github.com/kindred-plugin-market/plugin-market/compare/app-manager-v1.1.0...app-manager-v1.2.0) (2026-10-29)
 
 
